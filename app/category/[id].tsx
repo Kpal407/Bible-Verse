@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,15 +7,17 @@ import {
   Pressable,
   useColorScheme,
   Platform,
+  RefreshControl,
 } from "react-native";
-import { useLocalSearchParams, router } from "expo-router";
+import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons, Feather, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import * as Haptics from "expo-haptics";
 import { useThemeColors } from "@/constants/colors";
-import { getCategoryById } from "@/data/verses";
+import { getCategoryById, shuffleVerses } from "@/data/verses";
 import VerseCard from "@/components/VerseCard";
-import type { Category } from "@/data/verses";
+import type { Category, Verse } from "@/data/verses";
 
 function CategoryIcon({ category, size, color }: { category: Category; size: number; color: string }) {
   const props = { name: category.icon as any, size, color };
@@ -37,6 +39,27 @@ export default function CategoryScreen() {
   const colors = useThemeColors(colorScheme);
   const insets = useSafeAreaInsets();
   const category = getCategoryById(id);
+  const [shuffledVerses, setShuffledVerses] = useState<Verse[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (category) {
+        setShuffledVerses(shuffleVerses(category.verses));
+      }
+    }, [id])
+  );
+
+  const handleReshuffle = async () => {
+    if (Platform.OS !== "web") {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    if (category) {
+      setRefreshing(true);
+      setShuffledVerses(shuffleVerses(category.verses));
+      setTimeout(() => setRefreshing(false), 400);
+    }
+  };
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
 
@@ -58,6 +81,13 @@ export default function CategoryScreen() {
           { paddingTop: insets.top + webTopInset, paddingBottom: 40 },
         ]}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleReshuffle}
+            tintColor="#FFFFFF"
+          />
+        }
       >
         <LinearGradient
           colors={category.gradient}
@@ -65,16 +95,28 @@ export default function CategoryScreen() {
           end={{ x: 1, y: 1 }}
           style={styles.heroGradient}
         >
-          <Pressable
-            onPress={() => router.back()}
-            style={({ pressed }) => [
-              styles.backBtn,
-              { opacity: pressed ? 0.7 : 1 },
-            ]}
-            hitSlop={12}
-          >
-            <Ionicons name="chevron-back" size={24} color="rgba(255,255,255,0.9)" />
-          </Pressable>
+          <View style={styles.heroTopRow}>
+            <Pressable
+              onPress={() => router.back()}
+              style={({ pressed }) => [
+                styles.backBtn,
+                { opacity: pressed ? 0.7 : 1 },
+              ]}
+              hitSlop={12}
+            >
+              <Ionicons name="chevron-back" size={24} color="rgba(255,255,255,0.9)" />
+            </Pressable>
+            <Pressable
+              onPress={handleReshuffle}
+              style={({ pressed }) => [
+                styles.shuffleBtn,
+                { opacity: pressed ? 0.7 : 1 },
+              ]}
+              hitSlop={12}
+            >
+              <Ionicons name="shuffle" size={22} color="rgba(255,255,255,0.9)" />
+            </Pressable>
+          </View>
 
           <View style={styles.heroContent}>
             <View style={styles.heroIcon}>
@@ -89,7 +131,7 @@ export default function CategoryScreen() {
         </LinearGradient>
 
         <View style={styles.versesSection}>
-          {category.verses.map((verse) => (
+          {shuffledVerses.map((verse) => (
             <VerseCard key={verse.id} verse={verse} />
           ))}
         </View>
@@ -110,6 +152,12 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
   },
+  heroTopRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
   backBtn: {
     width: 40,
     height: 40,
@@ -117,7 +165,14 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.15)",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 16,
+  },
+  shuffleBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   heroContent: {
     alignItems: "center",
