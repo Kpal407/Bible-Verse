@@ -17,8 +17,12 @@ function NativeTabLayout() {
         <Label>Today</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="browse">
-        <Icon sf={{ default: "book", selected: "book.fill" }} />
+        <Icon sf={{ default: "square.grid.2x2", selected: "square.grid.2x2.fill" }} />
         <Label>Browse</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="bible">
+        <Icon sf={{ default: "book.closed", selected: "book.closed.fill" }} />
+        <Label>Bible</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="saved">
         <Icon sf={{ default: "bookmark", selected: "bookmark.fill" }} />
@@ -84,6 +88,15 @@ function ClassicTabLayout() {
         name="browse"
         options={{
           title: "Browse",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? "grid" : "grid-outline"} size={22} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="bible"
+        options={{
+          title: "Bible",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? "book" : "book-outline"} size={24} color={color} />
           ),

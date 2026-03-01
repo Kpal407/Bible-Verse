@@ -88,16 +88,16 @@ async function generateVersesForCategory(
     messages: [
       {
         role: "system",
-        content: `You are a Bible scholar. Return ONLY a valid JSON array of Bible verses. Each verse must be a real, verbatim scripture from the Bible (ESV translation preferred). Every reference must be accurate — do not fabricate or paraphrase. Include verses from both Old and New Testament when relevant.
+        content: `You are a Bible scholar. Return ONLY a valid JSON array of Bible verses. Each verse must be a real, verbatim scripture from the King James Version (KJV) of the Bible. Every reference must be accurate — do not fabricate or paraphrase. Include verses from both Old and New Testament when relevant.
 
 Return exactly this JSON structure (no markdown, no explanation, just the array):
-[{"reference":"Book Chapter:Verse","text":"exact scripture text","book":"Book Name","chapter":1,"verse":"1"}]
+[{"reference":"Book Chapter:Verse","text":"exact KJV scripture text","book":"Book Name","chapter":1,"verse":"1"}]
 
 For verse ranges like "1-3", use the range string in the verse field. The text must contain the complete passage for that range.`,
       },
       {
         role: "user",
-        content: `Give me ${count} real Bible verses related to: ${topic}. Choose diverse verses from different books of the Bible. Include lesser-known verses, not just the most popular ones.${excludeList}`,
+        content: `Give me ${count} real Bible verses (King James Version) related to: ${topic}. Choose diverse verses from different books of the Bible. Include lesser-known verses, not just the most popular ones.${excludeList}`,
       },
     ],
   });
@@ -123,6 +123,38 @@ For verse ranges like "1-3", use the range string in the verse field. The text m
   }
 
   return [];
+}
+
+const chapterCache = new Map<string, { verses: any[]; timestamp: number }>();
+const CACHE_TTL = 1000 * 60 * 60;
+
+async function fetchKJVChapter(book: string, chapter: number): Promise<any[]> {
+  const cacheKey = `${book}:${chapter}`;
+  const cached = chapterCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.verses;
+  }
+
+  const query = encodeURIComponent(`${book} ${chapter}`);
+  const response = await fetch(`https://bible-api.com/${query}?translation=kjv`);
+
+  if (!response.ok) {
+    throw new Error(`Bible API returned ${response.status}`);
+  }
+
+  const data = await response.json() as any;
+
+  if (!data.verses || !Array.isArray(data.verses)) {
+    throw new Error("Invalid response from Bible API");
+  }
+
+  const verses = data.verses.map((v: any) => ({
+    verse: v.verse,
+    text: v.text?.trim() || "",
+  }));
+
+  chapterCache.set(cacheKey, { verses, timestamp: Date.now() });
+  return verses;
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -153,6 +185,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating verses:", error);
       res.status(500).json({ error: "Failed to generate verses" });
+    }
+  });
+
+  app.get("/api/bible/:book/:chapter", async (req, res) => {
+    try {
+      const { book, chapter } = req.params;
+      const chapterNum = parseInt(chapter);
+
+      if (!chapterNum || chapterNum < 1) {
+        return res.status(400).json({ error: "Invalid chapter number" });
+      }
+
+      const verses = await fetchKJVChapter(decodeURIComponent(book), chapterNum);
+      res.json({ book: decodeURIComponent(book), chapter: chapterNum, verses });
+    } catch (error: any) {
+      console.error("Error fetching Bible chapter:", error.message);
+      res.status(500).json({ error: "Failed to fetch chapter" });
     }
   });
 

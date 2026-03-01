@@ -34,6 +34,14 @@ function RootLayoutNav() {
         name="category/[id]"
         options={{ headerShown: false, presentation: "card" }}
       />
+      <Stack.Screen
+        name="bible/chapters"
+        options={{ headerShown: false, presentation: "card" }}
+      />
+      <Stack.Screen
+        name="bible/reader"
+        options={{ headerShown: false, presentation: "card" }}
+      />
     </Stack>
   );
 }

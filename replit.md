@@ -5,6 +5,7 @@
 Daily Word is a React Native mobile app built with Expo that delivers Bible verses to users. The app features:
 - A **Today** tab showing a daily verse of the day
 - A **Browse** tab for exploring verses organized by categories (Daily Devotional, Faith, Hope, etc.)
+- A **Bible** tab with a full King James Version Bible reader (browse by book, chapter, and verse)
 - A **Saved** tab for bookmarking favorite verses
 
 The app works on iOS, Android, and Web. It has a companion Express.js backend server, though the current backend is mostly a scaffold (no custom API routes yet). Verse data is stored locally in a static TypeScript file (`data/verses.ts`). Saved verses are persisted locally on the device using AsyncStorage.
@@ -22,12 +23,15 @@ Preferred communication style: Simple, everyday language.
 ### Frontend (React Native / Expo)
 
 - **Framework**: Expo with Expo Router (file-based routing, similar to Next.js but for mobile)
-- **Navigation**: Tab-based layout with three tabs (Today, Browse, Saved). Uses `expo-router/unstable-native-tabs` on iOS with Liquid Glass support, and a classic BlurView tab bar on other platforms
+- **Navigation**: Tab-based layout with four tabs (Today, Browse, Bible, Saved). Uses `expo-router/unstable-native-tabs` on iOS with Liquid Glass support, and a classic BlurView tab bar on other platforms
 - **Routing structure**:
   - `app/(tabs)/index.tsx` → Today screen
   - `app/(tabs)/browse.tsx` → Browse categories
+  - `app/(tabs)/bible.tsx` → KJV Bible book list (Old/New Testament sections)
   - `app/(tabs)/saved.tsx` → Saved verses
   - `app/category/[id].tsx` → Dynamic category detail screen
+  - `app/bible/chapters.tsx` → Chapter grid for a selected book
+  - `app/bible/reader.tsx` → Full chapter reader with KJV verse text
 - **Theming**: Light/dark mode support via `constants/colors.ts`. Colors adapt automatically based on device color scheme using `useColorScheme()`
 - **Fonts**: Google Fonts loaded via `@expo-google-fonts` — Inter (body) and Playfair Display (headings)
 - **State management**: React Context (`SavedVersesContext`) for saved verses; TanStack React Query (`@tanstack/react-query`) is set up for future server data fetching
@@ -36,7 +40,7 @@ Preferred communication style: Simple, everyday language.
 ### Backend (Express.js)
 
 - **Server**: Express 5 in `server/index.ts`
-- **Routes**: Defined in `server/routes.ts` — includes `/api/verses/:categoryId` endpoint that uses OpenAI (via Replit AI Integrations) to dynamically generate real Bible verses for each category on demand
+- **Routes**: Defined in `server/routes.ts` — includes `/api/verses/:categoryId` for AI-generated KJV verses, and `/api/bible/:book/:chapter` for full KJV Bible chapter reading (proxied from bible-api.com with server-side caching)
 - **Storage**: `server/storage.ts` provides a `MemStorage` class (in-memory user store) and an `IStorage` interface. Can be swapped for a database-backed implementation
 - **CORS**: Configured to allow Replit dev domains and localhost for development
 
