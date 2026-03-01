@@ -36,13 +36,13 @@ Preferred communication style: Simple, everyday language.
 ### Backend (Express.js)
 
 - **Server**: Express 5 in `server/index.ts`
-- **Routes**: Defined in `server/routes.ts` — currently empty (scaffold only, ready to add `/api` routes)
+- **Routes**: Defined in `server/routes.ts` — includes `/api/verses/:categoryId` endpoint that uses OpenAI (via Replit AI Integrations) to dynamically generate real Bible verses for each category on demand
 - **Storage**: `server/storage.ts` provides a `MemStorage` class (in-memory user store) and an `IStorage` interface. Can be swapped for a database-backed implementation
 - **CORS**: Configured to allow Replit dev domains and localhost for development
 
 ### Data Layer
 
-- **Verse data**: Static data in `data/verses.ts`. 10 categories with 25-30 verses each (250+ total). Includes a `shuffleVerses()` function for randomized ordering. All categories and verses are hardcoded TypeScript objects — no database fetch needed for core content
+- **Verse data**: Static data in `data/verses.ts` provides 10 categories with 25-30 hardcoded verses each (250+ total) as a base set. The category detail screen dynamically fetches additional AI-generated verses from `/api/verses/:categoryId` and merges them with local data, deduplicating by reference. Users can tap "Load More Verses" to fetch additional batches infinitely
 - **Shuffle on visit**: Category detail screen uses `useFocusEffect` to shuffle verses each time the screen is opened, plus a pull-to-refresh and shuffle button for manual re-ordering
 - **Saved verses**: Persisted client-side using `@react-native-async-storage/async-storage` under the key `@daily_word_saved_verses`
 - **Database (scaffold)**: Drizzle ORM configured with PostgreSQL (`drizzle.config.ts`, `shared/schema.ts`). A `users` table is defined but not actively used yet. Ready for expansion
@@ -91,3 +91,9 @@ Preferred communication style: Simple, everyday language.
 - `DATABASE_URL` — PostgreSQL connection string (needed for Drizzle/DB features)
 - `EXPO_PUBLIC_DOMAIN` — Domain used to build API URLs from the mobile app
 - `REPLIT_DEV_DOMAIN` / `REPLIT_DOMAINS` — Automatically set by Replit for CORS configuration
+- `AI_INTEGRATIONS_OPENAI_API_KEY` — OpenAI API key (provided by Replit AI Integrations)
+- `AI_INTEGRATIONS_OPENAI_BASE_URL` — OpenAI base URL (provided by Replit AI Integrations)
+
+### AI Integration
+
+- **OpenAI** (via Replit AI Integrations): Used server-side to generate real Bible verses on demand. The `/api/verses/:categoryId` endpoint prompts GPT to return accurate, verbatim scripture with proper book/chapter/verse references. Integration files are in `server/replit_integrations/`
