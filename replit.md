@@ -8,7 +8,7 @@ Daily Word is a React Native mobile app built with Expo that delivers Bible vers
 - A **Bible** tab with a full King James Version Bible reader (browse by book, chapter, and verse)
 - A **Saved** tab for bookmarking favorite verses
 
-The app works on iOS, Android, and Web. It has a companion Express.js backend server, though the current backend is mostly a scaffold (no custom API routes yet). Verse data is stored locally in a static TypeScript file (`data/verses.ts`). Saved verses are persisted locally on the device using AsyncStorage.
+The app works on iOS, Android, and Web. It has a companion Express.js backend server with AI verse generation and Bible API endpoints. The app includes a freemium model with RevenueCat for in-app subscriptions — free users get limited AI verse loads, premium users get unlimited.
 
 ---
 
@@ -35,7 +35,7 @@ Preferred communication style: Simple, everyday language.
   - `app/notification-settings.tsx` → Daily verse reminder settings (topic, time picker)
 - **Theming**: Light/dark mode support via `constants/colors.ts`. Colors adapt automatically based on device color scheme using `useColorScheme()`
 - **Fonts**: Google Fonts loaded via `@expo-google-fonts` — Inter (body) and Playfair Display (headings)
-- **State management**: React Context (`SavedVersesContext`) for saved verses; `NotificationContext` for daily verse reminder preferences (topic, time, enabled); TanStack React Query (`@tanstack/react-query`) for server data fetching
+- **State management**: React Context (`SavedVersesContext`) for saved verses; `NotificationContext` for daily verse reminder preferences (topic, time, enabled); `PremiumContext` for RevenueCat subscription state (isPremium, offerings, purchase/restore); TanStack React Query (`@tanstack/react-query`) for server data fetching
 - **Animations/Haptics**: `expo-haptics` for tactile feedback, `expo-linear-gradient` for card gradients, `react-native-reanimated` available
 
 ### Backend (Express.js)
@@ -51,6 +51,7 @@ Preferred communication style: Simple, everyday language.
 - **Shuffle on visit**: Category detail screen uses `useFocusEffect` to shuffle verses each time the screen is opened, plus a pull-to-refresh and shuffle button for manual re-ordering
 - **Saved verses**: Persisted client-side using `@react-native-async-storage/async-storage` under the key `@daily_word_saved_verses`
 - **Notification prefs**: Stored in AsyncStorage under `@daily_word_notification_prefs` — includes enabled flag, selected category, hour, minute. Uses `expo-notifications` for daily scheduled local notifications on iOS/Android
+- **Premium/Monetization**: RevenueCat (`react-native-purchases`) manages in-app subscriptions. PremiumContext initializes the SDK, checks entitlements ("premium" or "pro"), and gates features. Free users get 2 AI verse loads per category visit; premium users get unlimited. Paywall screen (`app/paywall.tsx`) shows as a formSheet modal with feature list, subscription packages, and restore purchases. Star icon on Today screen opens the paywall for non-premium users. RevenueCat runs in Preview/Browser Mode during development
 - **Database (scaffold)**: Drizzle ORM configured with PostgreSQL (`drizzle.config.ts`, `shared/schema.ts`). A `users` table is defined but not actively used yet. Ready for expansion
 
 ### Shared Schema
@@ -90,6 +91,7 @@ Preferred communication style: Simple, everyday language.
 | **@expo/vector-icons** | Icon sets (Ionicons, MaterialIcons, Feather, MaterialCommunityIcons) |
 | **react-native-safe-area-context** | Safe area insets for notches/home bars |
 | **react-native-keyboard-controller** | Keyboard-aware scroll behavior |
+| **react-native-purchases** | RevenueCat SDK for in-app subscriptions |
 | **http-proxy-middleware** | Dev proxy setup |
 
 ### Environment Variables Required
@@ -99,6 +101,7 @@ Preferred communication style: Simple, everyday language.
 - `REPLIT_DEV_DOMAIN` / `REPLIT_DOMAINS` — Automatically set by Replit for CORS configuration
 - `AI_INTEGRATIONS_OPENAI_API_KEY` — OpenAI API key (provided by Replit AI Integrations)
 - `AI_INTEGRATIONS_OPENAI_BASE_URL` — OpenAI base URL (provided by Replit AI Integrations)
+- `REVENUECAT_API_KEY` — RevenueCat public SDK key (passed to frontend as `EXPO_PUBLIC_REVENUECAT_API_KEY`)
 
 ### AI Integration
 

@@ -19,6 +19,7 @@ import { useThemeColors } from "@/constants/colors";
 import { getCategoryById, shuffleVerses } from "@/data/verses";
 import VerseCard from "@/components/VerseCard";
 import { apiRequest } from "@/lib/query-client";
+import { usePremium } from "@/contexts/PremiumContext";
 import type { Category, Verse } from "@/data/verses";
 
 function CategoryIcon({ category, size, color }: { category: Category; size: number; color: string }) {
@@ -46,7 +47,9 @@ export default function CategoryScreen() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
   const [aiAvailable, setAiAvailable] = useState(true);
+  const [aiLoadCount, setAiLoadCount] = useState(0);
   const seenRefsRef = useRef<Set<string>>(new Set());
+  const { isPremium, canLoadMoreAI, remainingFreeLoads } = usePremium();
 
   const loadAIVerses = useCallback(async (currentVerses: Verse[], pageNum: number): Promise<{ verses: Verse[]; gotNew: boolean }> => {
     try {
@@ -111,11 +114,16 @@ export default function CategoryScreen() {
 
   const handleLoadMore = async () => {
     if (loadingMore) return;
+    if (!canLoadMoreAI(aiLoadCount)) {
+      router.push("/paywall");
+      return;
+    }
     setLoadingMore(true);
     const nextPage = page + 1;
     setPage(nextPage);
     const { verses: merged } = await loadAIVerses(verses, nextPage);
     setVerses(merged);
+    setAiLoadCount((c) => c + 1);
     setLoadingMore(false);
   };
 
@@ -188,20 +196,35 @@ export default function CategoryScreen() {
         </View>
       );
     }
+
+    const canLoad = canLoadMoreAI(aiLoadCount);
+    const remaining = remainingFreeLoads(aiLoadCount);
+
     return (
-      <Pressable
-        onPress={handleLoadMore}
-        style={({ pressed }) => [
-          styles.loadMoreBtn,
-          { backgroundColor: colors.card, opacity: pressed ? 0.8 : 1 },
-        ]}
-        testID="load-more-button"
-      >
-        <Ionicons name="add-circle-outline" size={20} color={colors.gold} />
-        <Text style={[styles.loadMoreText, { color: colors.gold }]}>
-          Load More Verses
-        </Text>
-      </Pressable>
+      <View>
+        <Pressable
+          onPress={handleLoadMore}
+          style={({ pressed }) => [
+            styles.loadMoreBtn,
+            { backgroundColor: canLoad ? colors.card : colors.tintLight, opacity: pressed ? 0.8 : 1 },
+          ]}
+          testID="load-more-button"
+        >
+          <Ionicons
+            name={canLoad ? "add-circle-outline" : "star"}
+            size={20}
+            color={colors.gold}
+          />
+          <Text style={[styles.loadMoreText, { color: colors.gold }]}>
+            {canLoad ? "Load More Verses" : "Unlock Unlimited Verses"}
+          </Text>
+        </Pressable>
+        {!isPremium && canLoad && remaining < 3 && (
+          <Text style={[styles.freeLoadsHint, { color: colors.textMuted }]}>
+            {remaining} free {remaining === 1 ? "load" : "loads"} remaining
+          </Text>
+        )}
+      </View>
     );
   };
 
@@ -320,6 +343,12 @@ const styles = StyleSheet.create({
   loadMoreText: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 15,
+  },
+  freeLoadsHint: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 12,
+    textAlign: "center",
+    marginTop: 6,
   },
   errorText: {
     fontFamily: "Inter_400Regular",

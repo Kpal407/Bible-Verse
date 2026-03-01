@@ -15,6 +15,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { queryClient } from "@/lib/query-client";
 import { SavedVersesProvider } from "@/contexts/SavedVersesContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
+import { PremiumProvider } from "@/contexts/PremiumContext";
 import { useThemeColors } from "@/constants/colors";
 
 SplashScreen.preventAutoHideAsync();
@@ -47,6 +48,16 @@ function RootLayoutNav() {
         name="notification-settings"
         options={{ headerShown: false, presentation: "card" }}
       />
+      <Stack.Screen
+        name="paywall"
+        options={{
+          headerShown: false,
+          presentation: "formSheet",
+          sheetAllowedDetents: [0.85, 1],
+          sheetGrabberVisible: true,
+          contentStyle: { backgroundColor: "transparent" },
+        }}
+      />
     </Stack>
   );
 }
@@ -74,15 +85,17 @@ export default function RootLayout() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <SavedVersesProvider>
-          <NotificationProvider>
-            <GestureHandlerRootView>
-              <KeyboardProvider>
-                <RootLayoutNav />
-              </KeyboardProvider>
-            </GestureHandlerRootView>
-          </NotificationProvider>
-        </SavedVersesProvider>
+        <PremiumProvider>
+          <SavedVersesProvider>
+            <NotificationProvider>
+              <GestureHandlerRootView>
+                <KeyboardProvider>
+                  <RootLayoutNav />
+                </KeyboardProvider>
+              </GestureHandlerRootView>
+            </NotificationProvider>
+          </SavedVersesProvider>
+        </PremiumProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

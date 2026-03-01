@@ -15,6 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useThemeColors } from "@/constants/colors";
 import { getVerseOfTheDay, getAllCategories } from "@/data/verses";
 import { useNotifications } from "@/contexts/NotificationContext";
+import { usePremium } from "@/contexts/PremiumContext";
 import VerseCard from "@/components/VerseCard";
 import CategoryCard from "@/components/CategoryCard";
 
@@ -26,6 +27,7 @@ export default function HomeScreen() {
   const [, setTick] = useState(0);
 
   const { prefs } = useNotifications();
+  const { isPremium } = usePremium();
   const { verse: todayVerse, category: todayCategory } = getVerseOfTheDay();
   const categories = getAllCategories();
 
@@ -62,21 +64,36 @@ export default function HomeScreen() {
               <Text style={[styles.dateLabel, { color: colors.textMuted }]}>{dateStr}</Text>
               <Text style={[styles.title, { color: colors.text }]}>Verse of the Day</Text>
             </View>
-            <Pressable
-              onPress={() => router.push("/notification-settings")}
-              style={({ pressed }) => [
-                styles.bellBtn,
-                { backgroundColor: colors.tintLight, opacity: pressed ? 0.7 : 1 },
-              ]}
-              hitSlop={8}
-              testID="notification-settings-button"
-            >
-              <Ionicons
-                name={prefs.enabled ? "notifications" : "notifications-outline"}
-                size={22}
-                color={colors.gold}
-              />
-            </Pressable>
+            <View style={styles.headerActions}>
+              {!isPremium && (
+                <Pressable
+                  onPress={() => router.push("/paywall")}
+                  style={({ pressed }) => [
+                    styles.premiumBtn,
+                    { backgroundColor: colors.tintLight, opacity: pressed ? 0.7 : 1 },
+                  ]}
+                  hitSlop={8}
+                  testID="premium-button"
+                >
+                  <Ionicons name="star" size={18} color={colors.gold} />
+                </Pressable>
+              )}
+              <Pressable
+                onPress={() => router.push("/notification-settings")}
+                style={({ pressed }) => [
+                  styles.bellBtn,
+                  { backgroundColor: colors.tintLight, opacity: pressed ? 0.7 : 1 },
+                ]}
+                hitSlop={8}
+                testID="notification-settings-button"
+              >
+                <Ionicons
+                  name={prefs.enabled ? "notifications" : "notifications-outline"}
+                  size={22}
+                  color={colors.gold}
+                />
+              </Pressable>
+            </View>
           </View>
         </View>
 
@@ -134,13 +151,25 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "flex-start",
   },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 2,
+  },
+  premiumBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   bellBtn: {
     width: 42,
     height: 42,
     borderRadius: 13,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 2,
   },
   dateLabel: {
     fontFamily: "Inter_500Medium",
