@@ -4,13 +4,17 @@ import {
   Text,
   View,
   ScrollView,
+  Pressable,
   useColorScheme,
   Platform,
   RefreshControl,
 } from "react-native";
+import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import { useThemeColors } from "@/constants/colors";
 import { getVerseOfTheDay, getAllCategories } from "@/data/verses";
+import { useNotifications } from "@/contexts/NotificationContext";
 import VerseCard from "@/components/VerseCard";
 import CategoryCard from "@/components/CategoryCard";
 
@@ -21,6 +25,7 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [, setTick] = useState(0);
 
+  const { prefs } = useNotifications();
   const { verse: todayVerse, category: todayCategory } = getVerseOfTheDay();
   const categories = getAllCategories();
 
@@ -52,8 +57,27 @@ export default function HomeScreen() {
         }
       >
         <View style={styles.header}>
-          <Text style={[styles.dateLabel, { color: colors.textMuted }]}>{dateStr}</Text>
-          <Text style={[styles.title, { color: colors.text }]}>Verse of the Day</Text>
+          <View style={styles.headerTopRow}>
+            <View>
+              <Text style={[styles.dateLabel, { color: colors.textMuted }]}>{dateStr}</Text>
+              <Text style={[styles.title, { color: colors.text }]}>Verse of the Day</Text>
+            </View>
+            <Pressable
+              onPress={() => router.push("/notification-settings")}
+              style={({ pressed }) => [
+                styles.bellBtn,
+                { backgroundColor: colors.tintLight, opacity: pressed ? 0.7 : 1 },
+              ]}
+              hitSlop={8}
+              testID="notification-settings-button"
+            >
+              <Ionicons
+                name={prefs.enabled ? "notifications" : "notifications-outline"}
+                size={22}
+                color={colors.gold}
+              />
+            </Pressable>
+          </View>
         </View>
 
         <VerseCard
@@ -104,6 +128,19 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 20,
     marginBottom: 16,
+  },
+  headerTopRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  bellBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 2,
   },
   dateLabel: {
     fontFamily: "Inter_500Medium",

@@ -32,9 +32,10 @@ Preferred communication style: Simple, everyday language.
   - `app/category/[id].tsx` → Dynamic category detail screen
   - `app/bible/chapters.tsx` → Chapter grid for a selected book
   - `app/bible/reader.tsx` → Full chapter reader with KJV verse text
+  - `app/notification-settings.tsx` → Daily verse reminder settings (topic, time picker)
 - **Theming**: Light/dark mode support via `constants/colors.ts`. Colors adapt automatically based on device color scheme using `useColorScheme()`
 - **Fonts**: Google Fonts loaded via `@expo-google-fonts` — Inter (body) and Playfair Display (headings)
-- **State management**: React Context (`SavedVersesContext`) for saved verses; TanStack React Query (`@tanstack/react-query`) is set up for future server data fetching
+- **State management**: React Context (`SavedVersesContext`) for saved verses; `NotificationContext` for daily verse reminder preferences (topic, time, enabled); TanStack React Query (`@tanstack/react-query`) for server data fetching
 - **Animations/Haptics**: `expo-haptics` for tactile feedback, `expo-linear-gradient` for card gradients, `react-native-reanimated` available
 
 ### Backend (Express.js)
@@ -49,6 +50,7 @@ Preferred communication style: Simple, everyday language.
 - **Verse data**: Static data in `data/verses.ts` provides 10 categories with 25-30 hardcoded verses each (250+ total) as a base set. The category detail screen dynamically fetches additional AI-generated verses from `/api/verses/:categoryId` and merges them with local data, deduplicating by reference. Users can tap "Load More Verses" to fetch additional batches infinitely
 - **Shuffle on visit**: Category detail screen uses `useFocusEffect` to shuffle verses each time the screen is opened, plus a pull-to-refresh and shuffle button for manual re-ordering
 - **Saved verses**: Persisted client-side using `@react-native-async-storage/async-storage` under the key `@daily_word_saved_verses`
+- **Notification prefs**: Stored in AsyncStorage under `@daily_word_notification_prefs` — includes enabled flag, selected category, hour, minute. Uses `expo-notifications` for daily scheduled local notifications on iOS/Android
 - **Database (scaffold)**: Drizzle ORM configured with PostgreSQL (`drizzle.config.ts`, `shared/schema.ts`). A `users` table is defined but not actively used yet. Ready for expansion
 
 ### Shared Schema

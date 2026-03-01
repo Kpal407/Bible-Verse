@@ -14,6 +14,7 @@ import {
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { queryClient } from "@/lib/query-client";
 import { SavedVersesProvider } from "@/contexts/SavedVersesContext";
+import { NotificationProvider } from "@/contexts/NotificationContext";
 import { useThemeColors } from "@/constants/colors";
 
 SplashScreen.preventAutoHideAsync();
@@ -40,6 +41,10 @@ function RootLayoutNav() {
       />
       <Stack.Screen
         name="bible/reader"
+        options={{ headerShown: false, presentation: "card" }}
+      />
+      <Stack.Screen
+        name="notification-settings"
         options={{ headerShown: false, presentation: "card" }}
       />
     </Stack>
@@ -70,11 +75,13 @@ export default function RootLayout() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <SavedVersesProvider>
-          <GestureHandlerRootView>
-            <KeyboardProvider>
-              <RootLayoutNav />
-            </KeyboardProvider>
-          </GestureHandlerRootView>
+          <NotificationProvider>
+            <GestureHandlerRootView>
+              <KeyboardProvider>
+                <RootLayoutNav />
+              </KeyboardProvider>
+            </GestureHandlerRootView>
+          </NotificationProvider>
         </SavedVersesProvider>
       </QueryClientProvider>
     </ErrorBoundary>
