@@ -16,8 +16,10 @@ import { useThemeColors } from "@/constants/colors";
 import { getVerseOfTheDay, getAllCategories } from "@/data/verses";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { usePremium } from "@/contexts/PremiumContext";
+import { useMusic } from "@/contexts/MusicContext";
 import VerseCard from "@/components/VerseCard";
 import CategoryCard from "@/components/CategoryCard";
+import MusicPlayer from "@/components/MusicPlayer";
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
@@ -28,6 +30,7 @@ export default function HomeScreen() {
 
   const { prefs } = useNotifications();
   const { isPremium } = usePremium();
+  const { currentTrack } = useMusic();
   const { verse: todayVerse, category: todayCategory } = getVerseOfTheDay();
   const categories = getAllCategories();
 
@@ -65,11 +68,26 @@ export default function HomeScreen() {
               <Text style={[styles.title, { color: colors.text }]}>Verse of the Day</Text>
             </View>
             <View style={styles.headerActions}>
+              <Pressable
+                onPress={() => router.push("/music")}
+                style={({ pressed }) => [
+                  styles.headerBtn,
+                  { backgroundColor: colors.tintLight, opacity: pressed ? 0.7 : 1 },
+                ]}
+                hitSlop={8}
+                testID="music-button"
+              >
+                <Ionicons
+                  name={currentTrack ? "musical-notes" : "musical-notes-outline"}
+                  size={20}
+                  color={colors.gold}
+                />
+              </Pressable>
               {!isPremium && (
                 <Pressable
                   onPress={() => router.push("/paywall")}
                   style={({ pressed }) => [
-                    styles.premiumBtn,
+                    styles.headerBtn,
                     { backgroundColor: colors.tintLight, opacity: pressed ? 0.7 : 1 },
                   ]}
                   hitSlop={8}
@@ -131,6 +149,7 @@ export default function HomeScreen() {
           <CategoryCard key={cat.id} category={cat} />
         ))}
       </ScrollView>
+      <MusicPlayer />
     </View>
   );
 }
@@ -157,7 +176,7 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 2,
   },
-  premiumBtn: {
+  headerBtn: {
     width: 42,
     height: 42,
     borderRadius: 13,

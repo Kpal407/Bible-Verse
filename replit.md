@@ -33,15 +33,18 @@ Preferred communication style: Simple, everyday language.
   - `app/bible/chapters.tsx` → Chapter grid for a selected book
   - `app/bible/reader.tsx` → Full chapter reader with KJV verse text
   - `app/notification-settings.tsx` → Daily verse reminder settings (topic, time picker)
+  - `app/paywall.tsx` → Premium subscription paywall (formSheet modal)
+  - `app/music.tsx` → Ambient music track list with play controls
 - **Theming**: Light/dark mode support via `constants/colors.ts`. Colors adapt automatically based on device color scheme using `useColorScheme()`
 - **Fonts**: Google Fonts loaded via `@expo-google-fonts` — Inter (body) and Playfair Display (headings)
-- **State management**: React Context (`SavedVersesContext`) for saved verses; `NotificationContext` for daily verse reminder preferences (topic, time, enabled); `PremiumContext` for RevenueCat subscription state (isPremium, offerings, purchase/restore); TanStack React Query (`@tanstack/react-query`) for server data fetching
+- **State management**: React Context (`SavedVersesContext`) for saved verses; `NotificationContext` for daily verse reminder preferences; `PremiumContext` for RevenueCat subscription state; `MusicContext` for ambient audio playback (track selection, play/pause/stop); TanStack React Query for server data fetching
 - **Animations/Haptics**: `expo-haptics` for tactile feedback, `expo-linear-gradient` for card gradients, `react-native-reanimated` available
 
 ### Backend (Express.js)
 
 - **Server**: Express 5 in `server/index.ts`
-- **Routes**: Defined in `server/routes.ts` — includes `/api/verses/:categoryId` for AI-generated KJV verses, and `/api/bible/:book/:chapter` for full KJV Bible chapter reading (proxied from bible-api.com with server-side caching)
+- **Routes**: Defined in `server/routes.ts` — includes `/api/verses/:categoryId` for AI-generated KJV verses, `/api/bible/:book/:chapter` for full KJV Bible chapter reading (proxied from bible-api.com with server-side caching), `/api/music/tracks` for track listing, and `/api/music/stream/:trackId` for streaming ambient WAV audio
+- **Ambient Audio**: `server/ambient-audio.ts` generates ambient WAV audio files programmatically using layered sine waves with vibrato, detuning, and swell effects. 5 tracks defined (3 free, 2 premium). Generated audio is cached in memory
 - **Storage**: `server/storage.ts` provides a `MemStorage` class (in-memory user store) and an `IStorage` interface. Can be swapped for a database-backed implementation
 - **CORS**: Configured to allow Replit dev domains and localhost for development
 
@@ -51,7 +54,8 @@ Preferred communication style: Simple, everyday language.
 - **Shuffle on visit**: Category detail screen uses `useFocusEffect` to shuffle verses each time the screen is opened, plus a pull-to-refresh and shuffle button for manual re-ordering
 - **Saved verses**: Persisted client-side using `@react-native-async-storage/async-storage` under the key `@daily_word_saved_verses`
 - **Notification prefs**: Stored in AsyncStorage under `@daily_word_notification_prefs` — includes enabled flag, selected category, hour, minute. Uses `expo-notifications` for daily scheduled local notifications on iOS/Android
-- **Premium/Monetization**: RevenueCat (`react-native-purchases`) manages in-app subscriptions. PremiumContext initializes the SDK, checks entitlements ("premium" or "pro"), and gates features. Free users get 2 AI verse loads per category visit; premium users get unlimited. Paywall screen (`app/paywall.tsx`) shows as a formSheet modal with feature list, subscription packages, and restore purchases. Star icon on Today screen opens the paywall for non-premium users. RevenueCat runs in Preview/Browser Mode during development
+- **Premium/Monetization**: RevenueCat (`react-native-purchases`) manages in-app subscriptions. PremiumContext initializes the SDK, checks entitlements ("premium" or "pro"), and gates features. Free users get 2 AI verse loads per category visit and 3 free music tracks; premium users get unlimited AI loads and all 5 music tracks. Paywall screen (`app/paywall.tsx`) shows as a formSheet modal with feature list, subscription packages, and restore purchases. Star icon on Today screen opens the paywall for non-premium users
+- **Ambient Music**: Floating mini-player (`components/MusicPlayer.tsx`) shows on Today screen when a track is playing. Music screen (`app/music.tsx`) lists all tracks with free/premium sections. Uses `expo-audio` for playback with looping and volume control. Tracks stream from the server as WAV audio
 - **Database (scaffold)**: Drizzle ORM configured with PostgreSQL (`drizzle.config.ts`, `shared/schema.ts`). A `users` table is defined but not actively used yet. Ready for expansion
 
 ### Shared Schema
@@ -92,6 +96,7 @@ Preferred communication style: Simple, everyday language.
 | **react-native-safe-area-context** | Safe area insets for notches/home bars |
 | **react-native-keyboard-controller** | Keyboard-aware scroll behavior |
 | **react-native-purchases** | RevenueCat SDK for in-app subscriptions |
+| **expo-audio** | Audio playback for ambient music tracks |
 | **http-proxy-middleware** | Dev proxy setup |
 
 ### Environment Variables Required

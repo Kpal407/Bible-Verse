@@ -16,6 +16,7 @@ import { queryClient } from "@/lib/query-client";
 import { SavedVersesProvider } from "@/contexts/SavedVersesContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import { PremiumProvider } from "@/contexts/PremiumContext";
+import { MusicProvider } from "@/contexts/MusicContext";
 import { useThemeColors } from "@/constants/colors";
 
 SplashScreen.preventAutoHideAsync();
@@ -58,6 +59,10 @@ function RootLayoutNav() {
           contentStyle: { backgroundColor: "transparent" },
         }}
       />
+      <Stack.Screen
+        name="music"
+        options={{ headerShown: false, presentation: "card" }}
+      />
     </Stack>
   );
 }
@@ -88,11 +93,13 @@ export default function RootLayout() {
         <PremiumProvider>
           <SavedVersesProvider>
             <NotificationProvider>
-              <GestureHandlerRootView>
-                <KeyboardProvider>
-                  <RootLayoutNav />
-                </KeyboardProvider>
-              </GestureHandlerRootView>
+              <MusicProvider>
+                <GestureHandlerRootView>
+                  <KeyboardProvider>
+                    <RootLayoutNav />
+                  </KeyboardProvider>
+                </GestureHandlerRootView>
+              </MusicProvider>
             </NotificationProvider>
           </SavedVersesProvider>
         </PremiumProvider>

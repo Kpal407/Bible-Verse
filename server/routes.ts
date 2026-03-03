@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "node:http";
 import OpenAI from "openai";
+import { getTrackList, streamTrack } from "./ambient-audio";
 
 const BIBLE_BOOKS = new Set([
   "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy",
@@ -203,6 +204,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error fetching Bible chapter:", error.message);
       res.status(500).json({ error: "Failed to fetch chapter" });
     }
+  });
+
+  app.get("/api/music/tracks", (_req, res) => {
+    res.json({ tracks: getTrackList() });
+  });
+
+  app.get("/api/music/stream/:trackId", (req, res) => {
+    const { trackId } = req.params;
+    const audioBuffer = streamTrack(trackId);
+
+    if (!audioBuffer) {
+      return res.status(404).json({ error: "Track not found" });
+    }
+
+    res.set({
+      "Content-Type": "audio/wav",
+      "Content-Length": audioBuffer.length.toString(),
+      "Cache-Control": "public, max-age=86400",
+      "Accept-Ranges": "bytes",
+    });
+
+    res.send(audioBuffer);
   });
 
   const httpServer = createServer(app);
