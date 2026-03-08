@@ -103,7 +103,7 @@ export default function MusicScreen() {
   const renderHeader = () => (
     <View>
       <LinearGradient
-        colors={[colors.gold, "#8B6914"]}
+        colors={[colors.gold, "#9A7008"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={[styles.hero, { paddingTop: insets.top + webTopInset + 12 }]}

@@ -121,7 +121,7 @@ export default function PaywallScreen() {
         </Pressable>
 
         <LinearGradient
-          colors={[colors.gold, "#B8832E"]}
+          colors={[colors.gold, "#9A7008"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.heroBanner}
