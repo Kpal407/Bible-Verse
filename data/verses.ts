@@ -33,7 +33,7 @@ const categories: Category[] = [
     description: "Start your day with God's word",
     icon: "sunny-outline",
     iconFamily: "Ionicons",
-    gradient: ["#FF8A65", "#F4673B"],
+    gradient: ["#FFA5D9", "#D2319A"],
     verses: [
       { id: "dd1", reference: "Psalm 118:24", text: "This is the day that the Lord has made; let us rejoice and be glad in it.", book: "Psalms", chapter: 118, verse: "24" },
       { id: "dd2", reference: "Lamentations 3:22-23", text: "The steadfast love of the Lord never ceases; his mercies never come to an end; they are new every morning; great is your faithfulness.", book: "Lamentations", chapter: 3, verse: "22-23" },
@@ -73,7 +73,7 @@ const categories: Category[] = [
     description: "Comfort in times of sorrow",
     icon: "heart-outline",
     iconFamily: "Ionicons",
-    gradient: ["#7B8FF5", "#5C6FE6"],
+    gradient: ["#A9C6EB", "#5D9CD9"],
     verses: [
       { id: "lg1", reference: "Psalm 34:18", text: "The Lord is near to the brokenhearted and saves the crushed in spirit.", book: "Psalms", chapter: 34, verse: "18" },
       { id: "lg2", reference: "Revelation 21:4", text: "He will wipe away every tear from their eyes, and death shall be no more, neither shall there be mourning, nor crying, nor pain anymore, for the former things have passed away.", book: "Revelation", chapter: 21, verse: "4" },
@@ -108,7 +108,7 @@ const categories: Category[] = [
     description: "Finding courage and resilience",
     icon: "shield-checkmark-outline",
     iconFamily: "Ionicons",
-    gradient: ["#FFA06C", "#F28548"],
+    gradient: ["#D2319A", "#A8287E"],
     verses: [
       { id: "ps1", reference: "Isaiah 41:10", text: "Fear not, for I am with you; be not dismayed, for I am your God; I will strengthen you, I will help you, I will uphold you with my righteous right hand.", book: "Isaiah", chapter: 41, verse: "10" },
       { id: "ps2", reference: "Philippians 4:13", text: "I can do all things through him who strengthens me.", book: "Philippians", chapter: 4, verse: "13" },
@@ -143,7 +143,7 @@ const categories: Category[] = [
     description: "Hope during health struggles",
     icon: "leaf-outline",
     iconFamily: "Ionicons",
-    gradient: ["#4FC3F7", "#29A8E0"],
+    gradient: ["#5D9CD9", "#4280C0"],
     verses: [
       { id: "ih1", reference: "Jeremiah 17:14", text: "Heal me, O Lord, and I shall be healed; save me, and I shall be saved, for you are my praise.", book: "Jeremiah", chapter: 17, verse: "14" },
       { id: "ih2", reference: "Psalm 103:2-3", text: "Bless the Lord, O my soul, and forget not all his benefits, who forgives all your iniquity, who heals all your diseases.", book: "Psalms", chapter: 103, verse: "2-3" },
@@ -178,7 +178,7 @@ const categories: Category[] = [
     description: "Peace through difficult seasons",
     icon: "hand-left-outline",
     iconFamily: "Ionicons",
-    gradient: ["#B07BF0", "#9258DC"],
+    gradient: ["#C870D9", "#9B40B0"],
     verses: [
       { id: "ds1", reference: "Psalm 34:17-18", text: "When the righteous cry for help, the Lord hears and delivers them out of all their troubles. The Lord is near to the brokenhearted and saves the crushed in spirit.", book: "Psalms", chapter: 34, verse: "17-18" },
       { id: "ds2", reference: "Jeremiah 29:11", text: "For I know the plans I have for you, declares the Lord, plans for welfare and not for evil, to give you a future and a hope.", book: "Jeremiah", chapter: 29, verse: "11" },
@@ -213,7 +213,7 @@ const categories: Category[] = [
     description: "Serving with a generous spirit",
     icon: "people-outline",
     iconFamily: "Ionicons",
-    gradient: ["#FFB74D", "#F5A030"],
+    gradient: ["#FFA5D9", "#E878B8"],
     verses: [
       { id: "ho1", reference: "Galatians 6:2", text: "Bear one another's burdens, and so fulfill the law of Christ.", book: "Galatians", chapter: 6, verse: "2" },
       { id: "ho2", reference: "Hebrews 13:16", text: "Do not neglect to do good and to share what you have, for such sacrifices are pleasing to God.", book: "Hebrews", chapter: 13, verse: "16" },
@@ -248,7 +248,7 @@ const categories: Category[] = [
     description: "The joy of a generous heart",
     icon: "gift-outline",
     iconFamily: "Ionicons",
-    gradient: ["#F06292", "#E04070"],
+    gradient: ["#7AB4E8", "#5D9CD9"],
     verses: [
       { id: "gv1", reference: "2 Corinthians 9:7", text: "Each one must give as he has decided in his heart, not reluctantly or under compulsion, for God loves a cheerful giver.", book: "2 Corinthians", chapter: 9, verse: "7" },
       { id: "gv2", reference: "Proverbs 11:25", text: "Whoever brings blessing will be enriched, and one who waters will himself be watered.", book: "Proverbs", chapter: 11, verse: "25" },
@@ -283,7 +283,7 @@ const categories: Category[] = [
     description: "Finding peace in uncertain times",
     icon: "cloud-outline",
     iconFamily: "Ionicons",
-    gradient: ["#64B5F6", "#4598E0"],
+    gradient: ["#A9C6EB", "#7BAAD8"],
     verses: [
       { id: "aw1", reference: "Philippians 4:6-7", text: "Do not be anxious about anything, but in everything by prayer and supplication with thanksgiving let your requests be made known to God. And the peace of God, which surpasses all understanding, will guard your hearts and your minds in Christ Jesus.", book: "Philippians", chapter: 4, verse: "6-7" },
       { id: "aw2", reference: "1 Peter 5:7", text: "Casting all your anxieties on him, because he cares for you.", book: "1 Peter", chapter: 5, verse: "7" },
@@ -318,7 +318,7 @@ const categories: Category[] = [
     description: "Grace to forgive and be forgiven",
     icon: "infinite-outline",
     iconFamily: "Ionicons",
-    gradient: ["#EF5350", "#D63B3B"],
+    gradient: ["#E85DAD", "#D2319A"],
     verses: [
       { id: "fg1", reference: "Colossians 3:13", text: "Bearing with one another and, if one has a complaint against another, forgiving each other; as the Lord has forgiven you, so you also must forgive.", book: "Colossians", chapter: 3, verse: "13" },
       { id: "fg2", reference: "Ephesians 4:32", text: "Be kind to one another, tenderhearted, forgiving one another, as God in Christ forgave you.", book: "Ephesians", chapter: 4, verse: "32" },
@@ -353,7 +353,7 @@ const categories: Category[] = [
     description: "A thankful heart before God",
     icon: "musical-notes-outline",
     iconFamily: "Ionicons",
-    gradient: ["#FFD54F", "#F5C030"],
+    gradient: ["#D2319A", "#5D9CD9"],
     verses: [
       { id: "gr1", reference: "1 Thessalonians 5:18", text: "Give thanks in all circumstances; for this is the will of God in Christ Jesus for you.", book: "1 Thessalonians", chapter: 5, verse: "18" },
       { id: "gr2", reference: "Psalm 100:4", text: "Enter his gates with thanksgiving, and his courts with praise! Give thanks to him; bless his name!", book: "Psalms", chapter: 100, verse: "4" },
