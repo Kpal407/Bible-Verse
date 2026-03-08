@@ -9,6 +9,7 @@ import {
   Platform,
   RefreshControl,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -51,6 +52,7 @@ export default function CategoryScreen() {
   const [aiAvailable, setAiAvailable] = useState(true);
   const [aiLoadCount, setAiLoadCount] = useState(0);
   const seenRefsRef = useRef<Set<string>>(new Set());
+  const aiErrorShownRef = useRef(false);
   const { isPremium, canLoadMoreAI, remainingFreeLoads } = usePremium();
   const { t, language } = useLanguage();
 
@@ -75,7 +77,14 @@ export default function CategoryScreen() {
         return { verses: [...currentVerses, ...newVerses], gotNew: newVerses.length > 0 };
       }
     } catch (err) {
-      console.log("AI verses unavailable, using local only");
+      if (__DEV__) console.log("AI verses unavailable, using local only");
+      if (!aiErrorShownRef.current) {
+        aiErrorShownRef.current = true;
+        Alert.alert(
+          t("category.aiErrorTitle"),
+          t("category.aiErrorMessage")
+        );
+      }
     }
     return { verses: currentVerses, gotNew: false };
   }, [id, language]);
@@ -84,6 +93,7 @@ export default function CategoryScreen() {
     useCallback(() => {
       if (category) {
         seenRefsRef.current = new Set();
+        aiErrorShownRef.current = false;
         setAiAvailable(true);
         const shuffled = shuffleVerses(category.verses);
         shuffled.forEach((v) => seenRefsRef.current.add(v.reference));

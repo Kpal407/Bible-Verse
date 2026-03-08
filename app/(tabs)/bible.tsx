@@ -17,6 +17,7 @@ import { bibleBooks, type BibleBook } from "@/data/bible-books";
 import { usePremium } from "@/contexts/PremiumContext";
 import { useBibleStorage } from "@/contexts/BibleStorageContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import OfflineBanner from "@/components/OfflineBanner";
 
 const oldTestament = bibleBooks.filter((b) => b.testament === "old");
 const newTestament = bibleBooks.filter((b) => b.testament === "new");
@@ -220,6 +221,7 @@ export default function BibleScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <OfflineBanner />
       <SectionList
         sections={sections}
         keyExtractor={(item) => item.abbreviation}

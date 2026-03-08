@@ -25,6 +25,7 @@ import VerseCard from "@/components/VerseCard";
 import CategoryCard from "@/components/CategoryCard";
 import MusicPlayer from "@/components/MusicPlayer";
 import UpgradeBanner from "@/components/UpgradeBanner";
+import OfflineBanner from "@/components/OfflineBanner";
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
@@ -77,6 +78,7 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <OfflineBanner />
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,

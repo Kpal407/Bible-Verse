@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useMemo, useRef, ReactNode } from "react";
-import { Platform } from "react-native";
+import { Platform, Alert } from "react-native";
 import { Audio } from "expo-av";
 import { useQuery } from "@tanstack/react-query";
 import { getApiUrl } from "@/lib/query-client";
@@ -22,6 +22,8 @@ interface MusicContextValue {
   resume: () => Promise<void>;
   stop: () => Promise<void>;
   tracksLoaded: boolean;
+  playbackError: string | null;
+  clearError: () => void;
 }
 
 const MusicContext = createContext<MusicContextValue | null>(null);
@@ -30,6 +32,7 @@ export function MusicProvider({ children }: { children: ReactNode }) {
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [playbackError, setPlaybackError] = useState<string | null>(null);
   const soundRef = useRef<Audio.Sound | null>(null);
 
   const { data: tracksData } = useQuery<{ tracks: Track[] }>({
@@ -45,7 +48,9 @@ export function MusicProvider({ children }: { children: ReactNode }) {
       try {
         await soundRef.current.stopAsync();
         await soundRef.current.unloadAsync();
-      } catch (e) {}
+      } catch (e) {
+        if (__DEV__) console.log("Error cleaning up sound:", e);
+      }
       soundRef.current = null;
     }
   }, []);
@@ -78,9 +83,12 @@ export function MusicProvider({ children }: { children: ReactNode }) {
         }
       });
     } catch (e) {
-      console.log("Error playing track:", e);
+      if (__DEV__) console.log("Error playing track:", e);
       setCurrentTrack(null);
       setIsPlaying(false);
+      const errorMsg = "Unable to play this track. Please check your connection and try again.";
+      setPlaybackError(errorMsg);
+      Alert.alert("Playback Error", errorMsg);
     } finally {
       setIsLoading(false);
     }
@@ -91,7 +99,9 @@ export function MusicProvider({ children }: { children: ReactNode }) {
       try {
         await soundRef.current.pauseAsync();
         setIsPlaying(false);
-      } catch (e) {}
+      } catch (e) {
+        if (__DEV__) console.log("Error pausing track:", e);
+      }
     }
   }, []);
 
@@ -100,7 +110,9 @@ export function MusicProvider({ children }: { children: ReactNode }) {
       try {
         await soundRef.current.playAsync();
         setIsPlaying(true);
-      } catch (e) {}
+      } catch (e) {
+        if (__DEV__) console.log("Error resuming track:", e);
+      }
     }
   }, []);
 
@@ -109,6 +121,10 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     setCurrentTrack(null);
     setIsPlaying(false);
   }, [cleanup]);
+
+  const clearError = useCallback(() => {
+    setPlaybackError(null);
+  }, []);
 
   const value = useMemo(
     () => ({
@@ -121,8 +137,10 @@ export function MusicProvider({ children }: { children: ReactNode }) {
       resume,
       stop,
       tracksLoaded,
+      playbackError,
+      clearError,
     }),
-    [tracks, currentTrack, isPlaying, isLoading, playTrack, pause, resume, stop, tracksLoaded]
+    [tracks, currentTrack, isPlaying, isLoading, playTrack, pause, resume, stop, tracksLoaded, playbackError, clearError]
   );
 
   return (

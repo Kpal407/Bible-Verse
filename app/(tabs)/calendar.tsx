@@ -22,6 +22,7 @@ import {
   getTodayEvent,
   type LiturgicalEvent,
 } from "@/data/liturgical-calendar";
+import OfflineBanner from "@/components/OfflineBanner";
 
 function formatDate(date: Date, language: string): string {
   const months =
@@ -132,6 +133,7 @@ export default function CalendarScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <OfflineBanner />
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,

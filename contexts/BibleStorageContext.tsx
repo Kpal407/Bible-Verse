@@ -102,7 +102,9 @@ export function BibleStorageProvider({ children }: { children: ReactNode }) {
         setDownloadedBooks(0);
         setTotalVerses(0);
       }
-    } catch (e) {}
+    } catch (e) {
+      if (__DEV__) console.log("Error checking download status:", e);
+    }
   };
 
   const startDownload = useCallback(async () => {
@@ -118,7 +120,9 @@ export function BibleStorageProvider({ children }: { children: ReactNode }) {
       if (statusJson) {
         existingStatus = JSON.parse(statusJson);
       }
-    } catch (e) {}
+    } catch (e) {
+      if (__DEV__) console.log("Error reading existing download status:", e);
+    }
 
     const completedSet = new Set(existingStatus.completedBooks);
     let verseCount = existingStatus.totalVerses;
@@ -153,6 +157,7 @@ export function BibleStorageProvider({ children }: { children: ReactNode }) {
               bookVerseCount += data.verses.length;
             }
           } catch (e) {
+            if (__DEV__) console.log(`Error fetching chapter ${ch} of ${book.name}:`, e);
             bookData[ch.toString()] = { verses: [] };
           }
 
@@ -185,7 +190,7 @@ export function BibleStorageProvider({ children }: { children: ReactNode }) {
           }
         }
       } catch (e) {
-        console.log(`Error downloading ${book.name}:`, e);
+        if (__DEV__) console.log(`Error downloading ${book.name}:`, e);
       }
     }
 
@@ -221,6 +226,7 @@ export function BibleStorageProvider({ children }: { children: ReactNode }) {
       if (!chapterData || !chapterData.verses || chapterData.verses.length === 0) return null;
       return chapterData.verses;
     } catch (e) {
+      if (__DEV__) console.log("Error reading offline chapter:", e);
       return null;
     }
   }, [storagePrefix]);

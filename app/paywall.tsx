@@ -15,7 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useThemeColors } from "@/constants/colors";
-import { usePremium } from "@/contexts/PremiumContext";
+import { usePremium, PurchaseErrorType } from "@/contexts/PremiumContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function PaywallScreen() {
@@ -94,12 +94,32 @@ export default function PaywallScreen() {
     },
   ];
 
+  const getErrorMessage = (errorType: PurchaseErrorType): { title: string; message: string } => {
+    switch (errorType) {
+      case "network":
+        return { title: t("paywall.errorNetwork"), message: t("paywall.errorNetworkMsg") };
+      case "payment_declined":
+        return { title: t("paywall.errorPaymentDeclined"), message: t("paywall.errorPaymentDeclinedMsg") };
+      case "product_unavailable":
+        return { title: t("paywall.errorProductUnavailable"), message: t("paywall.errorProductUnavailableMsg") };
+      case "purchase_not_allowed":
+        return { title: t("paywall.errorPurchaseNotAllowed"), message: t("paywall.errorPurchaseNotAllowedMsg") };
+      case "receipt_error":
+        return { title: t("paywall.errorReceipt"), message: t("paywall.errorReceiptMsg") };
+      default:
+        return { title: t("paywall.errorUnknown"), message: t("paywall.errorUnknownMsg") };
+    }
+  };
+
   const handlePurchase = async (pkg: any) => {
     setPurchasing(true);
     try {
-      const success = await purchasePackage(pkg);
-      if (success) {
+      const result = await purchasePackage(pkg);
+      if (result.success) {
         router.back();
+      } else if (result.error && result.error !== "cancelled") {
+        const { title, message } = getErrorMessage(result.error);
+        Alert.alert(title, message);
       }
     } finally {
       setPurchasing(false);
@@ -109,10 +129,13 @@ export default function PaywallScreen() {
   const handleRestore = async () => {
     setRestoring(true);
     try {
-      const success = await restorePurchases();
-      if (success) {
+      const result = await restorePurchases();
+      if (result.success) {
         Alert.alert(t("paywall.restored"), t("paywall.restoredMsg"));
         router.back();
+      } else if (result.error && result.error !== "cancelled") {
+        const { title, message } = getErrorMessage(result.error);
+        Alert.alert(title, message);
       } else {
         Alert.alert(t("paywall.noPurchases"), t("paywall.noPurchasesMsg"));
       }

@@ -5,17 +5,46 @@ import Purchases, { PurchasesOfferings, PurchasesPackage, CustomerInfo } from "r
 const REVENUECAT_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_API_KEY || "";
 const FREE_AI_LOADS = 2;
 
+export type PurchaseErrorType =
+  | "cancelled"
+  | "network"
+  | "payment_declined"
+  | "product_unavailable"
+  | "purchase_not_allowed"
+  | "receipt_error"
+  | "unknown";
+
+export interface PurchaseResult {
+  success: boolean;
+  error?: PurchaseErrorType;
+}
+
 interface PremiumContextValue {
   isPremium: boolean;
   isLoading: boolean;
   offerings: PurchasesOfferings | null;
-  purchasePackage: (pkg: PurchasesPackage) => Promise<boolean>;
-  restorePurchases: () => Promise<boolean>;
+  purchasePackage: (pkg: PurchasesPackage) => Promise<PurchaseResult>;
+  restorePurchases: () => Promise<PurchaseResult>;
   canLoadMoreAI: (currentLoads: number) => boolean;
   remainingFreeLoads: (currentLoads: number) => number;
 }
 
 const PremiumContext = createContext<PremiumContextValue | null>(null);
+
+function mapRevenueCatError(e: any): PurchaseErrorType {
+  if (e?.userCancelled) return "cancelled";
+
+  const code = String(e?.code || "").toUpperCase();
+  const message = String(e?.message || "").toLowerCase();
+
+  if (code.includes("NETWORK") || message.includes("network")) return "network";
+  if (code.includes("PURCHASE_CANCELLED") || code.includes("STORE_PROBLEM")) return "cancelled";
+  if (code.includes("PURCHASE_NOT_ALLOWED") || code.includes("PAYMENT_PENDING")) return "purchase_not_allowed";
+  if (code.includes("PRODUCT_NOT_AVAILABLE")) return "product_unavailable";
+  if (code.includes("RECEIPT") || code.includes("INVALID_RECEIPT") || code.includes("MISSING_RECEIPT")) return "receipt_error";
+
+  return "unknown";
+}
 
 export function PremiumProvider({ children }: { children: ReactNode }) {
   const [isPremium, setIsPremium] = useState(false);
@@ -26,6 +55,29 @@ export function PremiumProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     initRevenueCat();
   }, []);
+
+  useEffect(() => {
+    if (!initialized) return;
+
+    let cleanup: (() => void) | undefined;
+    try {
+      const result = Purchases.addCustomerInfoUpdateListener((customerInfo) => {
+        checkPremiumStatus(customerInfo);
+      }) as unknown;
+
+      if (result && typeof (result as any).remove === "function") {
+        cleanup = () => (result as any).remove();
+      } else if (typeof result === "function") {
+        cleanup = result as () => void;
+      }
+    } catch (e) {
+      if (__DEV__) console.log("Could not add customer info listener:", e);
+    }
+
+    return () => {
+      if (cleanup) cleanup();
+    };
+  }, [initialized]);
 
   const initRevenueCat = async () => {
     if (!REVENUECAT_API_KEY) {
@@ -48,10 +100,10 @@ export function PremiumProvider({ children }: { children: ReactNode }) {
         const offeringsResult = await Purchases.getOfferings();
         setOfferings(offeringsResult);
       } catch (e) {
-        console.log("Could not fetch offerings:", e);
+        if (__DEV__) console.log("Could not fetch offerings:", e);
       }
     } catch (e) {
-      console.log("RevenueCat init error:", e);
+      if (__DEV__) console.log("RevenueCat init error:", e);
     } finally {
       setIsLoading(false);
     }
@@ -64,32 +116,35 @@ export function PremiumProvider({ children }: { children: ReactNode }) {
     setIsPremium(hasActive);
   };
 
-  const purchasePackage = useCallback(async (pkg: PurchasesPackage): Promise<boolean> => {
-    if (!initialized) return false;
+  const purchasePackage = useCallback(async (pkg: PurchasesPackage): Promise<PurchaseResult> => {
+    if (!initialized) return { success: false, error: "unknown" };
     try {
       const { customerInfo } = await Purchases.purchasePackage(pkg);
       checkPremiumStatus(customerInfo);
-      return customerInfo.entitlements.active["premium"] !== undefined ||
+      const success =
+        customerInfo.entitlements.active["premium"] !== undefined ||
         customerInfo.entitlements.active["pro"] !== undefined;
+      return { success };
     } catch (e: any) {
-      if (e.userCancelled) {
-        return false;
-      }
-      console.log("Purchase error:", e);
-      return false;
+      const errorType = mapRevenueCatError(e);
+      if (__DEV__) console.log("Purchase error:", e);
+      return { success: false, error: errorType };
     }
   }, [initialized]);
 
-  const restorePurchases = useCallback(async (): Promise<boolean> => {
-    if (!initialized) return false;
+  const restorePurchases = useCallback(async (): Promise<PurchaseResult> => {
+    if (!initialized) return { success: false, error: "unknown" };
     try {
       const customerInfo = await Purchases.restorePurchases();
       checkPremiumStatus(customerInfo);
-      return customerInfo.entitlements.active["premium"] !== undefined ||
+      const success =
+        customerInfo.entitlements.active["premium"] !== undefined ||
         customerInfo.entitlements.active["pro"] !== undefined;
-    } catch (e) {
-      console.log("Restore error:", e);
-      return false;
+      return { success };
+    } catch (e: any) {
+      const errorType = mapRevenueCatError(e);
+      if (__DEV__) console.log("Restore error:", e);
+      return { success: false, error: errorType };
     }
   }, [initialized]);
 

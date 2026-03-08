@@ -70,11 +70,20 @@ Preferred communication style: Simple, everyday language.
 - Uses Drizzle ORM + `drizzle-zod` for type-safe schema definitions and validation
 - Currently defines a `users` table with `id`, `username`, `password`
 
+### Production Hardening
+
+- **Network resilience**: `lib/query-client.ts` uses `fetchWithTimeout` (15s timeout via AbortController), automatic retry with exponential backoff (up to 3 retries, skips 4xx errors), and `ApiError` class for proper status code classification
+- **Offline detection**: `components/OfflineBanner.tsx` uses `@react-native-community/netinfo` on native and `navigator.onLine` on web. Shows a subtle banner when offline. Integrated into Today, Calendar, and Bible tabs
+- **Payment error handling**: `PremiumContext` maps RevenueCat errors to specific types (network, payment_declined, product_unavailable, etc.). Paywall shows localized error alerts for each type. Real-time subscription state updates via `addCustomerInfoUpdateListener`
+- **Music/AI error handling**: Music playback failures show user-facing Alert. AI verse loading failures show a one-time alert per session (debounced via ref)
+- **Production cleanup**: All `console.log`/`console.error` wrapped in `__DEV__` guards. Empty catch blocks log in dev mode only
+
 ### Build & Dev
 
 - **Dev**: Run `npm run expo:dev` (Expo) and `npm run server:dev` (Express) concurrently
 - **Production build**: `scripts/build.js` handles static Expo build, `npm run server:build` bundles the server with esbuild
 - **DB migrations**: `npm run db:push` uses Drizzle Kit to push schema changes to the database
+- **Deployment**: Configured as autoscale with `npm run server:build` (esbuild) and `npm run server:prod` (Node.js)
 
 ---
 

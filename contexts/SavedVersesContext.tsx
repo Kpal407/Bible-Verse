@@ -28,7 +28,7 @@ export function SavedVersesProvider({ children }: { children: ReactNode }) {
         setSavedVerses(JSON.parse(stored));
       }
     } catch (e) {
-      console.error("Failed to load saved verses:", e);
+      if (__DEV__) console.error("Failed to load saved verses:", e);
     } finally {
       setIsLoading(false);
     }
@@ -52,7 +52,7 @@ export function SavedVersesProvider({ children }: { children: ReactNode }) {
       try {
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       } catch (e) {
-        console.error("Failed to save verses:", e);
+        if (__DEV__) console.error("Failed to save verses:", e);
       }
     },
     [savedVerses]
