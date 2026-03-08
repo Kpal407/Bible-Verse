@@ -8,6 +8,7 @@ import {
   Platform,
   useColorScheme,
 } from "react-native";
+import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
@@ -22,11 +23,21 @@ interface VerseCardProps {
   large?: boolean;
 }
 
+function navigateToPassage(verse: Verse) {
+  if (verse.book && verse.chapter) {
+    router.push({
+      pathname: "/bible/reader",
+      params: { book: verse.book, chapter: verse.chapter.toString() },
+    });
+  }
+}
+
 export default function VerseCard({ verse, gradient, showCategory, large }: VerseCardProps) {
   const colorScheme = useColorScheme();
   const colors = useThemeColors(colorScheme);
   const { isSaved, toggleSave } = useSavedVerses();
   const saved = isSaved(verse.id);
+  const hasPassageLink = !!(verse.book && verse.chapter);
 
   const handleSave = async () => {
     if (Platform.OS !== "web") {
@@ -44,6 +55,15 @@ export default function VerseCard({ verse, gradient, showCategory, large }: Vers
         message: `"${verse.text}"\n\n- ${verse.reference}`,
       });
     } catch {}
+  };
+
+  const handleReadPassage = () => {
+    if (hasPassageLink) {
+      if (Platform.OS !== "web") {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+      navigateToPassage(verse);
+    }
   };
 
   if (gradient) {
@@ -65,7 +85,22 @@ export default function VerseCard({ verse, gradient, showCategory, large }: Vers
         >
           {`\u201C${verse.text}\u201D`}
         </Text>
-        <Text style={styles.gradientReference}>{verse.reference}</Text>
+        {hasPassageLink ? (
+          <Pressable
+            onPress={handleReadPassage}
+            style={({ pressed }) => [
+              styles.referenceLink,
+              { opacity: pressed ? 0.7 : 1 },
+            ]}
+            hitSlop={6}
+            testID={`read-passage-${verse.id}`}
+          >
+            <Text style={styles.gradientReference}>{verse.reference}</Text>
+            <Ionicons name="open-outline" size={14} color="rgba(255,255,255,0.75)" />
+          </Pressable>
+        ) : (
+          <Text style={styles.gradientReference}>{verse.reference}</Text>
+        )}
         <View style={styles.actions}>
           <Pressable
             onPress={handleSave}
@@ -105,9 +140,26 @@ export default function VerseCard({ verse, gradient, showCategory, large }: Vers
       <Text style={[styles.verseText, { color: colors.text }]}>
         {`\u201C${verse.text}\u201D`}
       </Text>
-      <Text style={[styles.reference, { color: colors.tint }]}>
-        {verse.reference}
-      </Text>
+      {hasPassageLink ? (
+        <Pressable
+          onPress={handleReadPassage}
+          style={({ pressed }) => [
+            styles.referenceLink,
+            { opacity: pressed ? 0.7 : 1 },
+          ]}
+          hitSlop={6}
+          testID={`read-passage-${verse.id}`}
+        >
+          <Text style={[styles.reference, { color: colors.tint }]}>
+            {verse.reference}
+          </Text>
+          <Ionicons name="open-outline" size={13} color={colors.tint} />
+        </Pressable>
+      ) : (
+        <Text style={[styles.reference, { color: colors.tint }]}>
+          {verse.reference}
+        </Text>
+      )}
       <View style={styles.actions}>
         <Pressable
           onPress={handleSave}
@@ -172,7 +224,13 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_600SemiBold",
     fontSize: 14,
     color: "rgba(255,255,255,0.85)",
+  },
+  referenceLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
     marginBottom: 12,
+    alignSelf: "flex-start",
   },
   card: {
     borderRadius: 16,
@@ -190,7 +248,6 @@ const styles = StyleSheet.create({
   reference: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 13,
-    marginBottom: 8,
   },
   actions: {
     flexDirection: "row",
