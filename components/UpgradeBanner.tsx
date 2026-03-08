@@ -98,6 +98,10 @@ export default function UpgradeBanner({ variant = "full" }: UpgradeBannerProps) 
             <Ionicons name="globe-outline" size={16} color="rgba(255,255,255,0.9)" />
             <Text style={styles.featureText}>{t("upgrade.featureBilingual")}</Text>
           </View>
+          <View style={styles.featureItem}>
+            <Ionicons name="calendar-outline" size={16} color="rgba(255,255,255,0.9)" />
+            <Text style={styles.featureText}>{t("upgrade.featureCalendar")}</Text>
+          </View>
         </View>
         <View style={styles.fullButton}>
           <Text style={styles.fullButtonText}>{t("upgrade.tryPremium")}</Text>

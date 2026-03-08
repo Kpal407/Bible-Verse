@@ -12,8 +12,10 @@ import {
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useThemeColors } from "@/constants/colors";
 import { getVerseOfTheDay, getAllCategories } from "@/data/verses";
+import { getTodayEvent, getUpcomingEvents, LiturgicalEvent } from "@/data/liturgical-calendar";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { usePremium } from "@/contexts/PremiumContext";
 import { useMusic } from "@/contexts/MusicContext";
@@ -38,6 +40,19 @@ export default function HomeScreen() {
   const { streak, loaded: streakLoaded } = useStreak();
   const { verse: todayVerse, category: todayCategory } = getVerseOfTheDay();
   const categories = getAllCategories();
+
+  const todayEvent = getTodayEvent();
+  const upcomingEvents = getUpcomingEvents(1);
+  const liturgicalEvent: LiturgicalEvent | null = todayEvent ?? (upcomingEvents.length > 0 ? upcomingEvents[0] : null);
+  const isToday = !!todayEvent;
+
+  const getDaysUntil = (event: LiturgicalEvent): number => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const eventDate = new Date(event.date);
+    eventDate.setHours(0, 0, 0, 0);
+    return Math.round((eventDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  };
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -158,6 +173,52 @@ export default function HomeScreen() {
           </Text>
           <Ionicons name="swap-horizontal" size={14} color={colors.textMuted} />
         </Pressable>
+
+        {liturgicalEvent && (
+          <Pressable
+            onPress={() => router.push("/(tabs)/calendar" as any)}
+            style={({ pressed }) => [
+              styles.eventBanner,
+              { opacity: pressed ? 0.85 : 1 },
+            ]}
+            testID="liturgical-event-banner"
+          >
+            <LinearGradient
+              colors={liturgicalEvent.gradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.eventBannerGradient}
+            >
+              <View style={styles.eventIconWrap}>
+                <Ionicons name={liturgicalEvent.icon as any} size={22} color="#FFFFFF" />
+              </View>
+              <View style={styles.eventTextWrap}>
+                <View style={styles.eventNameRow}>
+                  <Text style={styles.eventName} numberOfLines={1}>
+                    {t(liturgicalEvent.nameKey)}
+                  </Text>
+                  {isToday && (
+                    <View style={styles.todayBadge}>
+                      <Text style={styles.todayBadgeText}>{t("calendar.today")}</Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={styles.eventDate} numberOfLines={1}>
+                  {isToday
+                    ? t(liturgicalEvent.descKey).length > 60
+                      ? t(liturgicalEvent.descKey).slice(0, 60) + "..."
+                      : t(liturgicalEvent.descKey)
+                    : (() => {
+                        const days = getDaysUntil(liturgicalEvent);
+                        if (days === 1) return t("calendar.tomorrow");
+                        return t("calendar.inDays").replace("{count}", String(days));
+                      })()}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.7)" />
+            </LinearGradient>
+          </Pressable>
+        )}
 
         {streakLoaded && streak > 0 && (
           <View style={[styles.streakCard, { backgroundColor: colors.tintLight }]}>
@@ -328,6 +389,60 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     fontSize: 12,
     marginTop: 1,
+  },
+  eventBanner: {
+    marginHorizontal: 20,
+    marginBottom: 12,
+    borderRadius: 14,
+    overflow: "hidden",
+  },
+  eventBannerGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    gap: 12,
+  },
+  eventIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.25)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  eventTextWrap: {
+    flex: 1,
+  },
+  eventNameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  eventName: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 15,
+    color: "#FFFFFF",
+    flexShrink: 1,
+  },
+  todayBadge: {
+    backgroundColor: "rgba(255,255,255,0.3)",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  todayBadgeText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 10,
+    color: "#FFFFFF",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  eventDate: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 12,
+    color: "rgba(255,255,255,0.85)",
+    marginTop: 2,
   },
   upgradeBannerWrap: {
     marginTop: 20,

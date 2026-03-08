@@ -83,6 +83,11 @@ export default function PaywallScreen() {
       description: t("paywall.premiumMusicDesc"),
     },
     {
+      icon: "calendar-outline" as const,
+      title: t("paywall.liturgicalCalendar"),
+      description: t("paywall.liturgicalCalendarDesc"),
+    },
+    {
       icon: "heart-outline" as const,
       title: t("paywall.supportMission"),
       description: t("paywall.supportMissionDesc"),

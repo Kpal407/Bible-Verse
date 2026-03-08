@@ -22,6 +22,10 @@ function NativeTabLayout() {
         <Icon sf={{ default: "square.grid.2x2", selected: "square.grid.2x2.fill" }} />
         <Label>{t("tab.browse")}</Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="calendar">
+        <Icon sf={{ default: "calendar", selected: "calendar" }} />
+        <Label>{t("tab.calendar")}</Label>
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="bible">
         <Icon sf={{ default: "book.closed", selected: "book.closed.fill" }} />
         <Label>{t("tab.bible")}</Label>
@@ -93,6 +97,15 @@ function ClassicTabLayout() {
           title: t("tab.browse"),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? "grid" : "grid-outline"} size={22} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="calendar"
+        options={{
+          title: t("tab.calendar"),
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? "calendar" : "calendar-outline"} size={22} color={color} />
           ),
         }}
       />

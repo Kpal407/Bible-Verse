@@ -6,6 +6,7 @@ Daily Word is a React Native mobile app built with Expo that delivers Bible vers
 - A **Today** tab showing a daily verse of the day
 - A **Browse** tab for exploring verses organized by categories (Daily Devotional, Faith, Hope, etc.)
 - A **Bible** tab with a full King James Version Bible reader (browse by book, chapter, and verse)
+- A **Calendar** tab with the full Christian liturgical calendar (Vatican calendar, moveable feasts, fixed holy days)
 - A **Saved** tab for bookmarking favorite verses
 
 The app works on iOS, Android, and Web. It has a companion Express.js backend server with AI verse generation and Bible API endpoints. The app includes a freemium model with RevenueCat for in-app subscriptions — free users get limited AI verse loads, premium users get unlimited.
@@ -23,11 +24,12 @@ Preferred communication style: Simple, everyday language.
 ### Frontend (React Native / Expo)
 
 - **Framework**: Expo with Expo Router (file-based routing, similar to Next.js but for mobile)
-- **Navigation**: Tab-based layout with four tabs (Today, Browse, Bible, Saved). Uses `expo-router/unstable-native-tabs` on iOS with Liquid Glass support, and a classic BlurView tab bar on other platforms
+- **Navigation**: Tab-based layout with five tabs (Today, Browse, Calendar, Bible, Saved). Uses `expo-router/unstable-native-tabs` on iOS with Liquid Glass support, and a classic BlurView tab bar on other platforms
 - **Routing structure**:
   - `app/(tabs)/index.tsx` → Today screen
   - `app/(tabs)/browse.tsx` → Browse categories
   - `app/(tabs)/bible.tsx` → KJV Bible book list (Old/New Testament sections)
+  - `app/(tabs)/calendar.tsx` → Liturgical calendar (premium-gated full view)
   - `app/(tabs)/saved.tsx` → Saved verses
   - `app/category/[id].tsx` → Dynamic category detail screen
   - `app/bible/chapters.tsx` → Chapter grid for a selected book
@@ -51,6 +53,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Layer
 
+- **Liturgical Calendar**: `data/liturgical-calendar.ts` provides the full Christian liturgical year with Easter date calculation (Computus algorithm), 13 fixed-date events (Christmas, Epiphany, All Saints, Immaculate Conception, Annunciation, etc.), 12+ moveable feasts (Ash Wednesday, Palm Sunday, Holy Week, Easter, Pentecost, etc.), Advent calculation, and 6 liturgical seasons. Helper functions: `getEventsForYear()`, `getUpcomingEvents()`, `getCurrentSeason()`, `getTodayEvent()`. Today screen shows an upcoming event banner (visible to all users). Calendar tab shows full yearly timeline (premium-gated for full view, free users see upcoming events + locked preview). Events have icons, colors, gradients, and bilingual name/description translations
 - **Verse data**: Static data in `data/verses.ts` provides 10 categories with 25-30 hardcoded verses each (250+ total) as a base set. The category detail screen dynamically fetches additional AI-generated verses from `/api/verses/:categoryId` and merges them with local data, deduplicating by reference. Users can tap "Load More Verses" to fetch additional batches infinitely
 - **Shuffle on visit**: Category detail screen uses `useFocusEffect` to shuffle verses each time the screen is opened, plus a pull-to-refresh and shuffle button for manual re-ordering
 - **Saved verses**: Persisted client-side using `@react-native-async-storage/async-storage` under the key `@daily_word_saved_verses`
