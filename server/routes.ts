@@ -218,14 +218,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(404).json({ error: "Track not found" });
     }
 
-    res.set({
-      "Content-Type": "audio/wav",
-      "Content-Length": audioBuffer.length.toString(),
-      "Cache-Control": "public, max-age=86400",
-      "Accept-Ranges": "bytes",
-    });
+    const total = audioBuffer.length;
+    const range = req.headers.range;
 
-    res.send(audioBuffer);
+    if (range) {
+      const parts = range.replace(/bytes=/, "").split("-");
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : total - 1;
+      const chunkSize = end - start + 1;
+
+      res.status(206);
+      res.set({
+        "Content-Range": `bytes ${start}-${end}/${total}`,
+        "Accept-Ranges": "bytes",
+        "Content-Length": chunkSize.toString(),
+        "Content-Type": "audio/wav",
+        "Cache-Control": "public, max-age=86400",
+      });
+
+      res.end(audioBuffer.subarray(start, end + 1));
+    } else {
+      res.set({
+        "Content-Type": "audio/wav",
+        "Content-Length": total.toString(),
+        "Accept-Ranges": "bytes",
+        "Cache-Control": "public, max-age=86400",
+      });
+
+      res.send(audioBuffer);
+    }
   });
 
   const httpServer = createServer(app);
