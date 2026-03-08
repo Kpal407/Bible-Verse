@@ -108,7 +108,7 @@ const categories: Category[] = [
     description: "Finding courage and resilience",
     icon: "shield-checkmark-outline",
     iconFamily: "Ionicons",
-    gradient: ["#42C9A2", "#2EB38A"],
+    gradient: ["#FFA06C", "#F28548"],
     verses: [
       { id: "ps1", reference: "Isaiah 41:10", text: "Fear not, for I am with you; be not dismayed, for I am your God; I will strengthen you, I will help you, I will uphold you with my righteous right hand.", book: "Isaiah", chapter: 41, verse: "10" },
       { id: "ps2", reference: "Philippians 4:13", text: "I can do all things through him who strengthens me.", book: "Philippians", chapter: 4, verse: "13" },
