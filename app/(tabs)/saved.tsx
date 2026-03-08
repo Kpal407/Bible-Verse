@@ -11,14 +11,17 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useThemeColors } from "@/constants/colors";
 import { useSavedVerses } from "@/contexts/SavedVersesContext";
+import { usePremium } from "@/contexts/PremiumContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import VerseCard from "@/components/VerseCard";
+import UpgradeBanner from "@/components/UpgradeBanner";
 
 export default function SavedScreen() {
   const colorScheme = useColorScheme();
   const colors = useThemeColors(colorScheme);
   const insets = useSafeAreaInsets();
   const { savedVerses, isLoading } = useSavedVerses();
+  const { isPremium } = usePremium();
   const { t } = useLanguage();
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
@@ -54,7 +57,14 @@ export default function SavedScreen() {
             </Text>
           </View>
         ) : (
-          savedVerses.map((verse) => <VerseCard key={verse.id} verse={verse} />)
+          <>
+            {savedVerses.map((verse) => <VerseCard key={verse.id} verse={verse} />)}
+            {!isPremium && savedVerses.length >= 3 && (
+              <View style={styles.upgradeNudge}>
+                <UpgradeBanner variant="inline" />
+              </View>
+            )}
+          </>
         )}
       </ScrollView>
     </View>
@@ -99,5 +109,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
     lineHeight: 20,
+  },
+  upgradeNudge: {
+    marginTop: 16,
+    marginBottom: 8,
   },
 });

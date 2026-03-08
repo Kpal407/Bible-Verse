@@ -21,6 +21,7 @@ import VerseCard from "@/components/VerseCard";
 import { apiRequest } from "@/lib/query-client";
 import { usePremium } from "@/contexts/PremiumContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import UpgradeBanner from "@/components/UpgradeBanner";
 import type { Category, Verse } from "@/data/verses";
 
 function CategoryIcon({ category, size, color }: { category: Category; size: number; color: string }) {
@@ -230,6 +231,11 @@ export default function CategoryScreen() {
           <Text style={[styles.freeLoadsHint, { color: colors.textMuted }]}>
             {remaining} {remaining === 1 ? t("category.freeLoadsRemaining") : t("category.freeLoadsRemainingPlural")}
           </Text>
+        )}
+        {!isPremium && !canLoad && (
+          <View style={{ marginTop: 16 }}>
+            <UpgradeBanner variant="compact" />
+          </View>
         )}
       </View>
     );

@@ -18,9 +18,11 @@ import { useNotifications } from "@/contexts/NotificationContext";
 import { usePremium } from "@/contexts/PremiumContext";
 import { useMusic } from "@/contexts/MusicContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useStreak } from "@/contexts/StreakContext";
 import VerseCard from "@/components/VerseCard";
 import CategoryCard from "@/components/CategoryCard";
 import MusicPlayer from "@/components/MusicPlayer";
+import UpgradeBanner from "@/components/UpgradeBanner";
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
@@ -33,6 +35,7 @@ export default function HomeScreen() {
   const { isPremium } = usePremium();
   const { currentTrack } = useMusic();
   const { t, language, setLanguage, dateLocale } = useLanguage();
+  const { streak, loaded: streakLoaded } = useStreak();
   const { verse: todayVerse, category: todayCategory } = getVerseOfTheDay();
   const categories = getAllCategories();
 
@@ -137,12 +140,34 @@ export default function HomeScreen() {
           </View>
         </View>
 
+        {streakLoaded && streak > 0 && (
+          <View style={[styles.streakCard, { backgroundColor: colors.tintLight }]}>
+            <View style={[styles.streakBadge, { backgroundColor: colors.gold }]}>
+              <Ionicons name="flame" size={18} color="#FFFFFF" />
+            </View>
+            <View style={styles.streakInfo}>
+              <Text style={[styles.streakNumber, { color: colors.gold }]}>
+                {streak} {t("streak.days")}
+              </Text>
+              <Text style={[styles.streakHint, { color: colors.textSecondary }]}>
+                {streak === 1 ? t("streak.firstDay") : t("streak.keepGoing")}
+              </Text>
+            </View>
+          </View>
+        )}
+
         <VerseCard
           verse={todayVerse}
           gradient={todayCategory.gradient}
           showCategory={categoryName}
           large
         />
+
+        {!isPremium && (
+          <View style={styles.upgradeBannerWrap}>
+            <UpgradeBanner variant="full" />
+          </View>
+        )}
 
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
@@ -170,6 +195,12 @@ export default function HomeScreen() {
         {categories.slice(0, 5).map((cat) => (
           <CategoryCard key={cat.id} category={cat} />
         ))}
+
+        {!isPremium && (
+          <View style={styles.upgradeBannerWrap}>
+            <UpgradeBanner variant="compact" />
+          </View>
+        )}
       </ScrollView>
       <MusicPlayer />
     </View>
@@ -228,6 +259,38 @@ const styles = StyleSheet.create({
     fontFamily: "PlayfairDisplay_700Bold",
     fontSize: 28,
     lineHeight: 36,
+  },
+  streakCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 20,
+    marginBottom: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+    gap: 12,
+  },
+  streakBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  streakInfo: {
+    flex: 1,
+  },
+  streakNumber: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 16,
+  },
+  streakHint: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 12,
+    marginTop: 1,
+  },
+  upgradeBannerWrap: {
+    marginTop: 20,
   },
   sectionHeader: {
     paddingHorizontal: 20,

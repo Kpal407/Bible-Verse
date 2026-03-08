@@ -19,6 +19,7 @@ import { PremiumProvider } from "@/contexts/PremiumContext";
 import { MusicProvider } from "@/contexts/MusicContext";
 import { BibleStorageProvider } from "@/contexts/BibleStorageContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { StreakProvider } from "@/contexts/StreakContext";
 import { useThemeColors } from "@/constants/colors";
 
 SplashScreen.preventAutoHideAsync();
@@ -93,6 +94,7 @@ export default function RootLayout() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <LanguageProvider>
+          <StreakProvider>
           <PremiumProvider>
             <BibleStorageProvider>
               <SavedVersesProvider>
@@ -108,6 +110,7 @@ export default function RootLayout() {
               </SavedVersesProvider>
             </BibleStorageProvider>
           </PremiumProvider>
+          </StreakProvider>
         </LanguageProvider>
       </QueryClientProvider>
     </ErrorBoundary>
