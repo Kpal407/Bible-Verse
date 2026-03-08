@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useCallback, useMemo, useEffect, ReactNode } from "react";
-import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
+import React, { createContext, useContext, useState, useCallback, useMemo, useRef, ReactNode } from "react";
+import { Platform } from "react-native";
+import { Audio } from "expo-av";
 import { useQuery } from "@tanstack/react-query";
 import { getApiUrl } from "@/lib/query-client";
 
@@ -16,23 +17,20 @@ interface MusicContextValue {
   currentTrack: Track | null;
   isPlaying: boolean;
   isLoading: boolean;
-  playTrack: (track: Track) => void;
-  pause: () => void;
-  resume: () => void;
-  stop: () => void;
+  playTrack: (track: Track) => Promise<void>;
+  pause: () => Promise<void>;
+  resume: () => Promise<void>;
+  stop: () => Promise<void>;
   tracksLoaded: boolean;
 }
 
 const MusicContext = createContext<MusicContextValue | null>(null);
 
-function getTrackUri(trackId: string): string {
-  const baseUrl = getApiUrl();
-  return new URL(`/api/music/stream/${trackId}`, baseUrl).toString();
-}
-
 export function MusicProvider({ children }: { children: ReactNode }) {
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
-  const [pendingTrack, setPendingTrack] = useState<Track | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const soundRef = useRef<Audio.Sound | null>(null);
 
   const { data: tracksData } = useQuery<{ tracks: Track[] }>({
     queryKey: ["/api/music/tracks"],
@@ -42,58 +40,75 @@ export function MusicProvider({ children }: { children: ReactNode }) {
   const tracks = tracksData?.tracks ?? [];
   const tracksLoaded = !!tracksData;
 
-  const player = useAudioPlayer(
-    currentTrack ? getTrackUri(currentTrack.id) : null,
-    { updateInterval: 500 }
-  );
-  const status = useAudioPlayerStatus(player);
-
-  const isPlaying = status.playing;
-  const isLoading = status.isBuffering && !status.isLoaded;
-
-  useEffect(() => {
-    if (player) {
-      player.loop = true;
-      player.volume = 0.6;
+  const cleanup = useCallback(async () => {
+    if (soundRef.current) {
+      try {
+        await soundRef.current.stopAsync();
+        await soundRef.current.unloadAsync();
+      } catch (e) {}
+      soundRef.current = null;
     }
-  }, [player]);
+  }, []);
 
-  useEffect(() => {
-    if (pendingTrack && player && status.isLoaded && !status.isBuffering) {
-      player.play();
-      setPendingTrack(null);
-    }
-  }, [pendingTrack, status.isLoaded, status.isBuffering, player]);
+  const playTrack = useCallback(async (track: Track) => {
+    setIsLoading(true);
+    try {
+      await cleanup();
 
-  const playTrack = useCallback((track: Track) => {
-    if (!player) return;
-    if (currentTrack?.id === track.id) {
-      player.play();
-      return;
-    }
-    setPendingTrack(track);
-    setCurrentTrack(track);
-  }, [currentTrack, player]);
+      if (Platform.OS !== "web") {
+        await Audio.setAudioModeAsync({
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: true,
+        });
+      }
 
-  const pause = useCallback(() => {
-    if (player && currentTrack) {
-      player.pause();
-    }
-  }, [player, currentTrack]);
+      const baseUrl = getApiUrl();
+      const uri = new URL(`/api/music/stream/${track.id}`, baseUrl).toString();
+      const { sound } = await Audio.Sound.createAsync(
+        { uri },
+        { shouldPlay: true, isLooping: true, volume: 0.6 }
+      );
+      soundRef.current = sound;
+      setCurrentTrack(track);
+      setIsPlaying(true);
 
-  const resume = useCallback(() => {
-    if (player && currentTrack) {
-      player.play();
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded && !status.isPlaying && !status.isBuffering) {
+          setIsPlaying(false);
+        }
+      });
+    } catch (e) {
+      console.log("Error playing track:", e);
+      setCurrentTrack(null);
+      setIsPlaying(false);
+    } finally {
+      setIsLoading(false);
     }
-  }, [player, currentTrack]);
+  }, [cleanup]);
 
-  const stop = useCallback(() => {
-    if (player && currentTrack) {
-      player.pause();
+  const pause = useCallback(async () => {
+    if (soundRef.current) {
+      try {
+        await soundRef.current.pauseAsync();
+        setIsPlaying(false);
+      } catch (e) {}
     }
+  }, []);
+
+  const resume = useCallback(async () => {
+    if (soundRef.current) {
+      try {
+        await soundRef.current.playAsync();
+        setIsPlaying(true);
+      } catch (e) {}
+    }
+  }, []);
+
+  const stop = useCallback(async () => {
+    await cleanup();
     setCurrentTrack(null);
-    setPendingTrack(null);
-  }, [player, currentTrack]);
+    setIsPlaying(false);
+  }, [cleanup]);
 
   const value = useMemo(
     () => ({
