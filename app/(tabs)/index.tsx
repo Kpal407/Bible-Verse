@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   streakNumber: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Inter_600SemiBold",
     fontSize: 16,
   },
   streakHint: {
