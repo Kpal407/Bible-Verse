@@ -140,6 +140,25 @@ export default function HomeScreen() {
           </View>
         </View>
 
+        <Pressable
+          onPress={toggleLanguage}
+          style={({ pressed }) => [
+            styles.bilingualBadge,
+            { backgroundColor: colors.tintLight, opacity: pressed ? 0.85 : 1 },
+          ]}
+          testID="bilingual-badge"
+        >
+          <Ionicons name="globe-outline" size={16} color={colors.gold} />
+          <Text style={[styles.bilingualText, { color: colors.gold }]}>
+            {t("bilingual.badge")}
+          </Text>
+          <Text style={[styles.bilingualDivider, { color: colors.textMuted }]}>|</Text>
+          <Text style={[styles.bilingualTranslation, { color: colors.textSecondary }]}>
+            {language === "en" ? t("bilingual.kjv") : t("bilingual.rvr")}
+          </Text>
+          <Ionicons name="swap-horizontal" size={14} color={colors.textMuted} />
+        </Pressable>
+
         {streakLoaded && streak > 0 && (
           <View style={[styles.streakCard, { backgroundColor: colors.tintLight }]}>
             <View style={[styles.streakBadge, { backgroundColor: colors.gold }]}>
@@ -257,6 +276,29 @@ const styles = StyleSheet.create({
     fontFamily: "PlayfairDisplay_700Bold",
     fontSize: 28,
     lineHeight: 36,
+  },
+  bilingualBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    marginHorizontal: 20,
+    marginBottom: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    gap: 6,
+  },
+  bilingualText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 13,
+  },
+  bilingualDivider: {
+    fontSize: 13,
+    marginHorizontal: 1,
+  },
+  bilingualTranslation: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 12,
   },
   streakCard: {
     flexDirection: "row",

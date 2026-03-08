@@ -105,6 +105,11 @@ export const translations: Record<Language, Record<string, string>> = {
     "streak.keepGoing": "Keep it going! Open Daily Word every day.",
     "streak.firstDay": "Welcome! Your streak starts today.",
 
+    "bilingual.badge": "English & Spanish",
+    "bilingual.hint": "Tap the globe to switch languages",
+    "bilingual.kjv": "KJV",
+    "bilingual.rvr": "Reina Valera 1960",
+
     "upgrade.goPremium": "Go Premium",
     "upgrade.upgrade": "Upgrade",
     "upgrade.unlockAll": "Unlock all features",
@@ -113,6 +118,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "upgrade.featureOffline": "Full Bible available offline",
     "upgrade.featureUnlimited": "Unlimited AI-powered verses",
     "upgrade.featureMusic": "All premium music tracks",
+    "upgrade.featureBilingual": "Full Bible in English & Spanish",
     "upgrade.tryPremium": "Try Premium",
     "upgrade.afterSave": "Save unlimited verses with Premium",
     "upgrade.verseLimitHit": "Want more? Upgrade for unlimited verses",
@@ -242,6 +248,11 @@ export const translations: Record<Language, Record<string, string>> = {
     "streak.keepGoing": "\u00a1Sigue as\u00ed! Abre Daily Word cada d\u00eda.",
     "streak.firstDay": "\u00a1Bienvenido! Tu racha comienza hoy.",
 
+    "bilingual.badge": "Ingl\u00e9s y Espa\u00f1ol",
+    "bilingual.hint": "Toca el globo para cambiar de idioma",
+    "bilingual.kjv": "KJV",
+    "bilingual.rvr": "Reina Valera 1960",
+
     "upgrade.goPremium": "Hazte Premium",
     "upgrade.upgrade": "Mejorar",
     "upgrade.unlockAll": "Desbloquea todas las funciones",
@@ -250,6 +261,7 @@ export const translations: Record<Language, Record<string, string>> = {
     "upgrade.featureOffline": "Biblia completa sin conexi\u00f3n",
     "upgrade.featureUnlimited": "Vers\u00edculos IA ilimitados",
     "upgrade.featureMusic": "Todas las pistas de m\u00fasica premium",
+    "upgrade.featureBilingual": "Biblia completa en ingl\u00e9s y espa\u00f1ol",
     "upgrade.tryPremium": "Probar Premium",
     "upgrade.afterSave": "Guarda vers\u00edculos ilimitados con Premium",
     "upgrade.verseLimitHit": "\u00bfQuieres m\u00e1s? Mejora para vers\u00edculos ilimitados",
