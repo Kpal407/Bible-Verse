@@ -10,6 +10,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useThemeColors } from "@/constants/colors";
 import { getAllCategories } from "@/data/verses";
+import { useLanguage } from "@/contexts/LanguageContext";
 import CategoryCard from "@/components/CategoryCard";
 
 export default function BrowseScreen() {
@@ -17,6 +18,7 @@ export default function BrowseScreen() {
   const colors = useThemeColors(colorScheme);
   const insets = useSafeAreaInsets();
   const categories = getAllCategories();
+  const { t } = useLanguage();
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
 
@@ -30,9 +32,9 @@ export default function BrowseScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text }]}>Browse Topics</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t("browse.title")}</Text>
           <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-            Find verses for every season of life
+            {t("browse.subtitle")}
           </Text>
         </View>
 

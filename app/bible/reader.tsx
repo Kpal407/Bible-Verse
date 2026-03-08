@@ -16,6 +16,7 @@ import { useThemeColors } from "@/constants/colors";
 import { apiRequest } from "@/lib/query-client";
 import { getBookByName } from "@/data/bible-books";
 import { useBibleStorage } from "@/contexts/BibleStorageContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface BibleVerse {
   verse: number;
@@ -28,6 +29,7 @@ export default function ReaderScreen() {
   const colors = useThemeColors(colorScheme);
   const insets = useSafeAreaInsets();
   const { isDownloaded, hasPartialDownload, getOfflineChapter } = useBibleStorage();
+  const { t, getBookName: getLocalizedBookName, bibleTranslation } = useLanguage();
   const [verses, setVerses] = useState<BibleVerse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,12 +38,13 @@ export default function ReaderScreen() {
   const chapterNum = parseInt(chapter || "1");
   const bookData = getBookByName(book || "");
   const maxChapters = bookData?.chapters || 1;
+  const displayBookName = getLocalizedBookName(book || "");
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
 
   useEffect(() => {
     loadChapter();
-  }, [book, chapter]);
+  }, [book, chapter, bibleTranslation]);
 
   const loadChapter = async () => {
     setLoading(true);
@@ -59,13 +62,14 @@ export default function ReaderScreen() {
     }
 
     try {
-      const res = await apiRequest("GET", `/api/bible/${encodeURIComponent(book || "")}/${chapterNum}`);
+      const translationParam = bibleTranslation !== "kjv" ? `?translation=${bibleTranslation}` : "";
+      const res = await apiRequest("GET", `/api/bible/${encodeURIComponent(book || "")}/${chapterNum}${translationParam}`);
       const data = await res.json();
       if (data.verses) {
         setVerses(data.verses);
       }
     } catch (err) {
-      setError("Unable to load this chapter. Please try again.");
+      setError(t("reader.unableToLoad"));
     } finally {
       setLoading(false);
     }
@@ -101,16 +105,16 @@ export default function ReaderScreen() {
           </Pressable>
           <View style={styles.headerCenter}>
             <Text style={[styles.headerBook, { color: colors.text }]} numberOfLines={1}>
-              {book}
+              {displayBookName}
             </Text>
             <View style={styles.headerSubRow}>
               <Text style={[styles.headerChapter, { color: colors.textMuted }]}>
-                Chapter {chapterNum}
+                {t("reader.chapter")} {chapterNum}
               </Text>
               {isOffline && (
                 <View style={styles.offlineBadge}>
                   <Ionicons name="checkmark-circle" size={12} color="#4CAF50" />
-                  <Text style={styles.offlineText}>Offline</Text>
+                  <Text style={styles.offlineText}>{t("reader.offline")}</Text>
                 </View>
               )}
             </View>
@@ -122,7 +126,7 @@ export default function ReaderScreen() {
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={colors.gold} />
             <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
-              Loading chapter...
+              {t("reader.loadingChapter")}
             </Text>
           </View>
         ) : error ? (
@@ -136,14 +140,14 @@ export default function ReaderScreen() {
                 { backgroundColor: colors.tintLight, opacity: pressed ? 0.7 : 1 },
               ]}
             >
-              <Text style={[styles.retryText, { color: colors.gold }]}>Try Again</Text>
+              <Text style={[styles.retryText, { color: colors.gold }]}>{t("reader.tryAgain")}</Text>
             </Pressable>
           </View>
         ) : (
           <>
             <View style={styles.chapterTitle}>
               <Text style={[styles.chapterTitleText, { color: colors.gold }]}>
-                Chapter {chapterNum}
+                {t("reader.chapter")} {chapterNum}
               </Text>
             </View>
 
@@ -173,7 +177,7 @@ export default function ReaderScreen() {
               >
                 <Ionicons name="chevron-back" size={18} color={colors.gold} />
                 <Text style={[styles.navText, { color: colors.gold }]}>
-                  Ch. {chapterNum - 1}
+                  {t("reader.ch")} {chapterNum - 1}
                 </Text>
               </Pressable>
             ) : (
@@ -189,7 +193,7 @@ export default function ReaderScreen() {
                 testID="next-chapter"
               >
                 <Text style={[styles.navText, { color: colors.gold }]}>
-                  Ch. {chapterNum + 1}
+                  {t("reader.ch")} {chapterNum + 1}
                 </Text>
                 <Ionicons name="chevron-forward" size={18} color={colors.gold} />
               </Pressable>

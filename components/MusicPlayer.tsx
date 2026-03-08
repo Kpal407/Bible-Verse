@@ -4,11 +4,13 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useThemeColors } from "@/constants/colors";
 import { useMusic } from "@/contexts/MusicContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function MusicPlayer() {
   const colorScheme = useColorScheme();
   const colors = useThemeColors(colorScheme);
   const { currentTrack, isPlaying, isLoading, pause, resume, stop } = useMusic();
+  const { t } = useLanguage();
 
   if (!currentTrack) return null;
 
@@ -35,7 +37,7 @@ export default function MusicPlayer() {
             {currentTrack.name}
           </Text>
           <Text style={[styles.trackDesc, { color: colors.textMuted }]} numberOfLines={1}>
-            {isLoading ? "Loading..." : isPlaying ? "Playing" : "Paused"}
+            {isLoading ? t("music.loading") : isPlaying ? t("music.playing") : t("music.paused")}
           </Text>
         </View>
       </Pressable>

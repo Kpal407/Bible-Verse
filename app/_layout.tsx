@@ -18,6 +18,7 @@ import { NotificationProvider } from "@/contexts/NotificationContext";
 import { PremiumProvider } from "@/contexts/PremiumContext";
 import { MusicProvider } from "@/contexts/MusicContext";
 import { BibleStorageProvider } from "@/contexts/BibleStorageContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import { useThemeColors } from "@/constants/colors";
 
 SplashScreen.preventAutoHideAsync();
@@ -91,21 +92,23 @@ export default function RootLayout() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <PremiumProvider>
-          <BibleStorageProvider>
-            <SavedVersesProvider>
-              <NotificationProvider>
-                  <MusicProvider>
-                  <GestureHandlerRootView>
-                    <KeyboardProvider>
-                      <RootLayoutNav />
-                    </KeyboardProvider>
-                  </GestureHandlerRootView>
-                </MusicProvider>
-              </NotificationProvider>
-            </SavedVersesProvider>
-          </BibleStorageProvider>
-        </PremiumProvider>
+        <LanguageProvider>
+          <PremiumProvider>
+            <BibleStorageProvider>
+              <SavedVersesProvider>
+                <NotificationProvider>
+                    <MusicProvider>
+                    <GestureHandlerRootView>
+                      <KeyboardProvider>
+                        <RootLayoutNav />
+                      </KeyboardProvider>
+                    </GestureHandlerRootView>
+                  </MusicProvider>
+                </NotificationProvider>
+              </SavedVersesProvider>
+            </BibleStorageProvider>
+          </PremiumProvider>
+        </LanguageProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

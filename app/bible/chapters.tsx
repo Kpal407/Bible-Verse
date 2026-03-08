@@ -12,13 +12,17 @@ import { useLocalSearchParams, router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useThemeColors } from "@/constants/colors";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function ChaptersScreen() {
   const { book, chapters } = useLocalSearchParams<{ book: string; chapters: string }>();
   const colorScheme = useColorScheme();
   const colors = useThemeColors(colorScheme);
   const insets = useSafeAreaInsets();
+  const { t, getBookName: getLocalizedBookName } = useLanguage();
   const chapterCount = parseInt(chapters || "1");
+  const displayBookName = getLocalizedBookName(book || "");
+  const chapterLabel = chapterCount !== 1 ? t("bible.chapters") : t("bible.chapter");
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
 
@@ -51,9 +55,9 @@ export default function ChaptersScreen() {
           <View style={[styles.bookIcon, { backgroundColor: colors.tintLight }]}>
             <Ionicons name="book-outline" size={24} color={colors.gold} />
           </View>
-          <Text style={[styles.bookTitle, { color: colors.text }]}>{book}</Text>
+          <Text style={[styles.bookTitle, { color: colors.text }]}>{displayBookName}</Text>
           <Text style={[styles.chapterLabel, { color: colors.textSecondary }]}>
-            {chapterCount} Chapter{chapterCount !== 1 ? "s" : ""}
+            {chapterCount} {chapterLabel}
           </Text>
         </View>
 

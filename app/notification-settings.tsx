@@ -16,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useThemeColors } from "@/constants/colors";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { getAllCategories } from "@/data/verses";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const hours = Array.from({ length: 24 }, (_, i) => i);
 const minutes = [0, 15, 30, 45];
@@ -33,20 +34,22 @@ export default function NotificationSettingsScreen() {
   const insets = useSafeAreaInsets();
   const { prefs, updatePrefs, hasPermission, requestPermission } = useNotifications();
   const categories = getAllCategories();
+  const { t } = useLanguage();
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
 
   const selectedCategory = categories.find((c) => c.id === prefs.categoryId);
+  const selectedCategoryName = selectedCategory ? t(`category.${selectedCategory.id}.name`) : t("category.daily-devotional.name");
 
   const handleToggle = async (value: boolean) => {
     if (value && !hasPermission && Platform.OS !== "web") {
       const granted = await requestPermission();
       if (!granted) {
         Alert.alert(
-          "Notifications Disabled",
-          "Please enable notifications in your device settings to receive daily verses."
+          t("notifications.disabled"),
+          t("notifications.enableMsg")
         );
         return;
       }
@@ -63,6 +66,10 @@ export default function NotificationSettingsScreen() {
     await updatePrefs({ hour, minute });
     setShowTimePicker(false);
   };
+
+  const previewText = t("notifications.preview")
+    .replace("{category}", selectedCategoryName)
+    .replace("{time}", formatTime(prefs.hour, prefs.minute));
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -91,9 +98,9 @@ export default function NotificationSettingsScreen() {
           <View style={[styles.iconContainer, { backgroundColor: colors.tintLight }]}>
             <Ionicons name="notifications" size={28} color={colors.gold} />
           </View>
-          <Text style={[styles.title, { color: colors.text }]}>Daily Reminder</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t("notifications.title")}</Text>
           <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-            Receive a verse at your chosen time each day
+            {t("notifications.subtitle")}
           </Text>
         </View>
 
@@ -102,7 +109,7 @@ export default function NotificationSettingsScreen() {
             <View style={styles.settingLabel}>
               <Ionicons name="notifications-outline" size={20} color={colors.gold} />
               <Text style={[styles.settingText, { color: colors.text }]}>
-                Daily Notifications
+                {t("notifications.dailyNotifications")}
               </Text>
             </View>
             <Switch
@@ -117,7 +124,7 @@ export default function NotificationSettingsScreen() {
 
         {prefs.enabled && (
           <>
-            <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>TOPIC</Text>
+            <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>{t("notifications.topic")}</Text>
             <Pressable
               onPress={() => setShowCategoryPicker(!showCategoryPicker)}
               style={({ pressed }) => [
@@ -130,7 +137,7 @@ export default function NotificationSettingsScreen() {
                 <View style={styles.settingLabel}>
                   <Ionicons name="pricetag-outline" size={20} color={colors.gold} />
                   <Text style={[styles.settingText, { color: colors.text }]}>
-                    {selectedCategory?.name || "Daily Devotional"}
+                    {selectedCategoryName}
                   </Text>
                 </View>
                 <Ionicons
@@ -162,7 +169,7 @@ export default function NotificationSettingsScreen() {
                         { color: cat.id === prefs.categoryId ? colors.gold : colors.text },
                       ]}
                     >
-                      {cat.name}
+                      {t(`category.${cat.id}.name`)}
                     </Text>
                     {cat.id === prefs.categoryId && (
                       <Ionicons name="checkmark" size={18} color={colors.gold} />
@@ -172,7 +179,7 @@ export default function NotificationSettingsScreen() {
               </View>
             )}
 
-            <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>TIME</Text>
+            <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>{t("notifications.time")}</Text>
             <Pressable
               onPress={() => setShowTimePicker(!showTimePicker)}
               style={({ pressed }) => [
@@ -236,8 +243,7 @@ export default function NotificationSettingsScreen() {
 
             <View style={styles.previewSection}>
               <Text style={[styles.previewLabel, { color: colors.textMuted }]}>
-                You will receive a {selectedCategory?.name || "Daily Devotional"} verse every day at{" "}
-                {formatTime(prefs.hour, prefs.minute)}.
+                {previewText}
               </Text>
             </View>
           </>

@@ -16,16 +16,16 @@ import { useThemeColors } from "@/constants/colors";
 import { bibleBooks, type BibleBook } from "@/data/bible-books";
 import { usePremium } from "@/contexts/PremiumContext";
 import { useBibleStorage } from "@/contexts/BibleStorageContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const oldTestament = bibleBooks.filter((b) => b.testament === "old");
 const newTestament = bibleBooks.filter((b) => b.testament === "new");
 
-const sections = [
-  { title: "Old Testament", data: oldTestament },
-  { title: "New Testament", data: newTestament },
-];
-
 function BookRow({ book, colors }: { book: BibleBook; colors: any }) {
+  const { t, getBookName } = useLanguage();
+  const displayName = getBookName(book.name);
+  const chapterLabel = book.chapters !== 1 ? t("bible.chapters") : t("bible.chapter");
+
   return (
     <Pressable
       onPress={() =>
@@ -45,9 +45,9 @@ function BookRow({ book, colors }: { book: BibleBook; colors: any }) {
       testID={`book-${book.abbreviation}`}
     >
       <View style={styles.bookInfo}>
-        <Text style={[styles.bookName, { color: colors.text }]}>{book.name}</Text>
+        <Text style={[styles.bookName, { color: colors.text }]}>{displayName}</Text>
         <Text style={[styles.bookChapters, { color: colors.textMuted }]}>
-          {book.chapters} chapter{book.chapters !== 1 ? "s" : ""}
+          {book.chapters} {chapterLabel}
         </Text>
       </View>
       <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
@@ -57,6 +57,7 @@ function BookRow({ book, colors }: { book: BibleBook; colors: any }) {
 
 function DownloadBanner({ colors }: { colors: any }) {
   const { isPremium } = usePremium();
+  const { t, language } = useLanguage();
   const {
     isDownloaded,
     isDownloading,
@@ -90,10 +91,10 @@ function DownloadBanner({ colors }: { colors: any }) {
         </View>
         <View style={styles.bannerTextContainer}>
           <Text style={[styles.bannerTitle, { color: colors.text }]}>
-            Offline Bible
+            {t("bible.offlineBible")}
           </Text>
           <Text style={[styles.bannerDesc, { color: colors.textSecondary }]}>
-            Upgrade to download all 31,102 verses for offline reading
+            {t("bible.upgradeOffline")}
           </Text>
         </View>
         <View style={[styles.upgradeBadge, { backgroundColor: colors.gold }]}>
@@ -117,10 +118,10 @@ function DownloadBanner({ colors }: { colors: any }) {
         </View>
         <View style={styles.bannerTextContainer}>
           <Text style={[styles.bannerTitle, { color: colors.text }]}>
-            Downloading... {pct}%
+            {t("bible.downloading")} {pct}%
           </Text>
           <Text style={[styles.bannerDesc, { color: colors.textSecondary }]} numberOfLines={1}>
-            {currentBook} ({downloadedBooks}/{totalBooks} books)
+            {currentBook} ({downloadedBooks}/{totalBooks} {t("bible.books")})
           </Text>
           <View style={[styles.progressBar, { backgroundColor: colors.divider }]}>
             <View
@@ -158,10 +159,10 @@ function DownloadBanner({ colors }: { colors: any }) {
         </View>
         <View style={styles.bannerTextContainer}>
           <Text style={[styles.bannerTitle, { color: colors.text }]}>
-            Offline Bible Ready
+            {t("bible.offlineBibleReady")}
           </Text>
           <Text style={[styles.bannerDesc, { color: colors.textSecondary }]}>
-            {totalVerses > 0 ? `${totalVerses.toLocaleString()} verses` : "All 66 books"} available offline
+            {totalVerses > 0 ? `${totalVerses.toLocaleString()} ${t("bible.verses")}` : `66 ${t("bible.books")}`} {t("bible.allBooksAvailable")}
           </Text>
         </View>
       </View>
@@ -169,6 +170,7 @@ function DownloadBanner({ colors }: { colors: any }) {
   }
 
   if (isPremium && !isDownloaded && !isDownloading) {
+    const downloadLabel = language === "es" ? t("bible.downloadFullBibleEs") : t("bible.downloadFullBible");
     return (
       <Pressable
         onPress={startDownload}
@@ -187,12 +189,12 @@ function DownloadBanner({ colors }: { colors: any }) {
         </View>
         <View style={styles.bannerTextContainer}>
           <Text style={[styles.bannerTitle, { color: colors.text }]}>
-            {hasPartialDownload ? "Resume Download" : "Download Full KJV Bible"}
+            {hasPartialDownload ? t("bible.resumeDownload") : downloadLabel}
           </Text>
           <Text style={[styles.bannerDesc, { color: colors.textSecondary }]}>
             {hasPartialDownload
-              ? `${downloadedBooks}/${totalBooks} books downloaded -- tap to continue`
-              : "Save all 31,102 verses for offline reading"}
+              ? `${downloadedBooks}/${totalBooks} ${t("bible.booksDownloaded")}`
+              : t("bible.saveAllVerses")}
           </Text>
         </View>
         <Ionicons name="download-outline" size={22} color={colors.gold} />
@@ -207,8 +209,14 @@ export default function BibleScreen() {
   const colorScheme = useColorScheme();
   const colors = useThemeColors(colorScheme);
   const insets = useSafeAreaInsets();
+  const { t } = useLanguage();
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
+
+  const sections = [
+    { title: t("bible.oldTestament"), data: oldTestament },
+    { title: t("bible.newTestament"), data: newTestament },
+  ];
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -229,9 +237,9 @@ export default function BibleScreen() {
                   <Ionicons name="book" size={28} color={colors.gold} />
                 </View>
               </View>
-              <Text style={[styles.title, { color: colors.text }]}>King James Bible</Text>
+              <Text style={[styles.title, { color: colors.text }]}>{t("bible.title")}</Text>
               <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-                Read the complete Holy Bible
+                {t("bible.subtitle")}
               </Text>
             </View>
             <DownloadBanner colors={colors} />

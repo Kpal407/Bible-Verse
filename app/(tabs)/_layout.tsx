@@ -8,25 +8,27 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import React from "react";
 
 import Colors from "@/constants/colors";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 function NativeTabLayout() {
+  const { t } = useLanguage();
   return (
     <NativeTabs>
       <NativeTabs.Trigger name="index">
         <Icon sf={{ default: "sun.max", selected: "sun.max.fill" }} />
-        <Label>Today</Label>
+        <Label>{t("tab.today")}</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="browse">
         <Icon sf={{ default: "square.grid.2x2", selected: "square.grid.2x2.fill" }} />
-        <Label>Browse</Label>
+        <Label>{t("tab.browse")}</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="bible">
         <Icon sf={{ default: "book.closed", selected: "book.closed.fill" }} />
-        <Label>Bible</Label>
+        <Label>{t("tab.bible")}</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="saved">
         <Icon sf={{ default: "bookmark", selected: "bookmark.fill" }} />
-        <Label>Saved</Label>
+        <Label>{t("tab.saved")}</Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );
@@ -39,6 +41,7 @@ function ClassicTabLayout() {
   const isWeb = Platform.OS === "web";
   const isIOS = Platform.OS === "ios";
   const theme = isDark ? Colors.dark : Colors.light;
+  const { t } = useLanguage();
 
   return (
     <Tabs
@@ -78,7 +81,7 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Today",
+          title: t("tab.today"),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? "sunny" : "sunny-outline"} size={24} color={color} />
           ),
@@ -87,7 +90,7 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="browse"
         options={{
-          title: "Browse",
+          title: t("tab.browse"),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? "grid" : "grid-outline"} size={22} color={color} />
           ),
@@ -96,7 +99,7 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="bible"
         options={{
-          title: "Bible",
+          title: t("tab.bible"),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? "book" : "book-outline"} size={24} color={color} />
           ),
@@ -105,7 +108,7 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="saved"
         options={{
-          title: "Saved",
+          title: t("tab.saved"),
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? "bookmark" : "bookmark-outline"} size={24} color={color} />
           ),

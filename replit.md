@@ -37,7 +37,8 @@ Preferred communication style: Simple, everyday language.
   - `app/music.tsx` → Ambient music track list with play controls
 - **Theming**: Light/dark mode support via `constants/colors.ts`. Colors adapt automatically based on device color scheme using `useColorScheme()`
 - **Fonts**: Google Fonts loaded via `@expo-google-fonts` — Inter (body) and Playfair Display (headings)
-- **State management**: React Context (`SavedVersesContext`) for saved verses; `NotificationContext` for daily verse reminder preferences; `PremiumContext` for RevenueCat subscription state; `MusicContext` for ambient audio playback (track selection, play/pause/stop); TanStack React Query for server data fetching
+- **State management**: React Context (`SavedVersesContext`) for saved verses; `NotificationContext` for daily verse reminder preferences; `PremiumContext` for RevenueCat subscription state; `MusicContext` for ambient audio playback (track selection, play/pause/stop); `LanguageContext` for bilingual English/Spanish support (persisted in AsyncStorage); TanStack React Query for server data fetching
+- **Internationalization (i18n)**: `lib/i18n.ts` contains all UI strings in English and Spanish. `contexts/LanguageContext.tsx` provides `useLanguage()` hook with `t(key)` translation function, `getBookName()` for localized Bible book names, `bibleTranslation` ("kjv" or "rvr1960"), and `dateLocale`. Language toggle on Today screen header (globe icon). Spanish Bible uses Reina Valera 1960 translation from bible-api.com. AI verse generation supports Spanish via `?lang=es` parameter. Offline Bible downloads are stored separately per language (prefix `kjv_book_` vs `rvr_book_`)
 - **Animations/Haptics**: `expo-haptics` for tactile feedback, `expo-linear-gradient` for card gradients, `react-native-reanimated` available
 
 ### Backend (Express.js)

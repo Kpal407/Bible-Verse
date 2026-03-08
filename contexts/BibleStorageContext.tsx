@@ -2,9 +2,12 @@ import React, { createContext, useContext, useState, useCallback, useEffect, use
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { apiRequest } from "@/lib/query-client";
 import { bibleBooks } from "@/data/bible-books";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-const STORAGE_PREFIX = "kjv_book_";
-const DOWNLOAD_STATUS_KEY = "kjv_download_status";
+const STORAGE_PREFIX_EN = "kjv_book_";
+const STORAGE_PREFIX_ES = "rvr_book_";
+const DOWNLOAD_STATUS_KEY_EN = "kjv_download_status";
+const DOWNLOAD_STATUS_KEY_ES = "rvr_download_status";
 
 interface VerseData {
   verse: number;
@@ -44,6 +47,7 @@ interface BibleStorageContextValue {
 const BibleStorageContext = createContext<BibleStorageContextValue | null>(null);
 
 export function BibleStorageProvider({ children }: { children: ReactNode }) {
+  const { language, bibleTranslation } = useLanguage();
   const [isDownloaded, setIsDownloaded] = useState(false);
   const [hasPartialDownload, setHasPartialDownload] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -53,32 +57,50 @@ export function BibleStorageProvider({ children }: { children: ReactNode }) {
   const cancelRef = useRef(false);
   const mountedRef = useRef(true);
 
+  const storagePrefix = language === "es" ? STORAGE_PREFIX_ES : STORAGE_PREFIX_EN;
+  const statusKey = language === "es" ? DOWNLOAD_STATUS_KEY_ES : DOWNLOAD_STATUS_KEY_EN;
+
   const totalBooks = bibleBooks.length;
   const downloadProgress = totalBooks > 0 ? downloadedBooks / totalBooks : 0;
 
   useEffect(() => {
     mountedRef.current = true;
+    cancelRef.current = false;
+    setIsDownloading(false);
+    setCurrentBook("");
     checkDownloadStatus();
     return () => {
       mountedRef.current = false;
       cancelRef.current = true;
     };
-  }, []);
+  }, [language]);
 
   const checkDownloadStatus = async () => {
     try {
-      const statusJson = await AsyncStorage.getItem(DOWNLOAD_STATUS_KEY);
+      const statusJson = await AsyncStorage.getItem(statusKey);
       if (statusJson) {
         const status: DownloadStatus = JSON.parse(statusJson);
         if (status.complete && status.completedBooks.length === totalBooks) {
           setIsDownloaded(true);
+          setHasPartialDownload(false);
           setDownloadedBooks(totalBooks);
           setTotalVerses(status.totalVerses);
         } else if (status.completedBooks.length > 0) {
+          setIsDownloaded(false);
           setHasPartialDownload(true);
           setDownloadedBooks(status.completedBooks.length);
           setTotalVerses(status.totalVerses);
+        } else {
+          setIsDownloaded(false);
+          setHasPartialDownload(false);
+          setDownloadedBooks(0);
+          setTotalVerses(0);
         }
+      } else {
+        setIsDownloaded(false);
+        setHasPartialDownload(false);
+        setDownloadedBooks(0);
+        setTotalVerses(0);
       }
     } catch (e) {}
   };
@@ -92,7 +114,7 @@ export function BibleStorageProvider({ children }: { children: ReactNode }) {
 
     let existingStatus: DownloadStatus = { completedBooks: [], totalVerses: 0, complete: false };
     try {
-      const statusJson = await AsyncStorage.getItem(DOWNLOAD_STATUS_KEY);
+      const statusJson = await AsyncStorage.getItem(statusKey);
       if (statusJson) {
         existingStatus = JSON.parse(statusJson);
       }
@@ -104,6 +126,8 @@ export function BibleStorageProvider({ children }: { children: ReactNode }) {
     if (mountedRef.current) {
       setDownloadedBooks(completedSet.size);
     }
+
+    const translationParam = bibleTranslation !== "kjv" ? `?translation=${bibleTranslation}` : "";
 
     for (let i = 0; i < bibleBooks.length; i++) {
       if (cancelRef.current || !mountedRef.current) break;
@@ -122,7 +146,7 @@ export function BibleStorageProvider({ children }: { children: ReactNode }) {
           if (cancelRef.current || !mountedRef.current) break;
 
           try {
-            const res = await apiRequest("GET", `/api/bible/${encodeURIComponent(book.name)}/${ch}`);
+            const res = await apiRequest("GET", `/api/bible/${encodeURIComponent(book.name)}/${ch}${translationParam}`);
             const data = await res.json();
             if (data.verses) {
               bookData[ch.toString()] = { verses: data.verses };
@@ -137,7 +161,7 @@ export function BibleStorageProvider({ children }: { children: ReactNode }) {
 
         if (cancelRef.current || !mountedRef.current) break;
 
-        await AsyncStorage.setItem(STORAGE_PREFIX + book.name, JSON.stringify(bookData));
+        await AsyncStorage.setItem(storagePrefix + book.name, JSON.stringify(bookData));
         completedSet.add(book.name);
         verseCount += bookVerseCount;
 
@@ -148,7 +172,7 @@ export function BibleStorageProvider({ children }: { children: ReactNode }) {
           complete: isComplete,
           downloadedAt: isComplete ? new Date().toISOString() : undefined,
         };
-        await AsyncStorage.setItem(DOWNLOAD_STATUS_KEY, JSON.stringify(status));
+        await AsyncStorage.setItem(statusKey, JSON.stringify(status));
 
         if (mountedRef.current) {
           setDownloadedBooks(completedSet.size);
@@ -169,7 +193,7 @@ export function BibleStorageProvider({ children }: { children: ReactNode }) {
       setIsDownloading(false);
       setCurrentBook("");
     }
-  }, [isDownloading, totalBooks]);
+  }, [isDownloading, totalBooks, storagePrefix, statusKey, bibleTranslation]);
 
   const cancelDownload = useCallback(() => {
     cancelRef.current = true;
@@ -177,8 +201,8 @@ export function BibleStorageProvider({ children }: { children: ReactNode }) {
 
   const deleteDownload = useCallback(async () => {
     cancelRef.current = true;
-    const keys = bibleBooks.map((b) => STORAGE_PREFIX + b.name);
-    keys.push(DOWNLOAD_STATUS_KEY);
+    const keys = bibleBooks.map((b) => storagePrefix + b.name);
+    keys.push(statusKey);
     await AsyncStorage.multiRemove(keys);
     if (mountedRef.current) {
       setIsDownloaded(false);
@@ -186,11 +210,11 @@ export function BibleStorageProvider({ children }: { children: ReactNode }) {
       setDownloadedBooks(0);
       setTotalVerses(0);
     }
-  }, []);
+  }, [storagePrefix, statusKey]);
 
   const getOfflineChapter = useCallback(async (book: string, chapter: number): Promise<VerseData[] | null> => {
     try {
-      const bookJson = await AsyncStorage.getItem(STORAGE_PREFIX + book);
+      const bookJson = await AsyncStorage.getItem(storagePrefix + book);
       if (!bookJson) return null;
       const bookData: BookData = JSON.parse(bookJson);
       const chapterData = bookData[chapter.toString()];
@@ -199,7 +223,7 @@ export function BibleStorageProvider({ children }: { children: ReactNode }) {
     } catch (e) {
       return null;
     }
-  }, []);
+  }, [storagePrefix]);
 
   const value = useMemo(
     () => ({

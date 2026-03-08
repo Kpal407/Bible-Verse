@@ -16,6 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useThemeColors } from "@/constants/colors";
 import { useMusic, type Track } from "@/contexts/MusicContext";
 import { usePremium } from "@/contexts/PremiumContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 function TrackCard({ track }: { track: Track }) {
   const colorScheme = useColorScheme();
@@ -92,6 +93,7 @@ export default function MusicScreen() {
   const colors = useThemeColors(colorScheme);
   const insets = useSafeAreaInsets();
   const { tracks, tracksLoaded, currentTrack, isPlaying, stop } = useMusic();
+  const { t } = useLanguage();
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
 
@@ -118,8 +120,8 @@ export default function MusicScreen() {
           <View style={styles.heroIcon}>
             <Ionicons name="musical-notes" size={36} color="rgba(255,255,255,0.95)" />
           </View>
-          <Text style={styles.heroTitle}>Ambient Music</Text>
-          <Text style={styles.heroSubtitle}>Peaceful sounds for reading Scripture</Text>
+          <Text style={styles.heroTitle}>{t("music.title")}</Text>
+          <Text style={styles.heroSubtitle}>{t("music.subtitle")}</Text>
         </View>
       </LinearGradient>
 
@@ -128,7 +130,7 @@ export default function MusicScreen() {
           <View style={styles.nowPlayingInfo}>
             <Ionicons name={isPlaying ? "volume-high" : "volume-mute"} size={18} color={colors.gold} />
             <Text style={[styles.nowPlayingText, { color: colors.text }]}>
-              {isPlaying ? `Now Playing: ${currentTrack.name}` : `Paused: ${currentTrack.name}`}
+              {isPlaying ? `${t("music.nowPlaying")}: ${currentTrack.name}` : `${t("music.paused")}: ${currentTrack.name}`}
             </Text>
           </View>
           <Pressable
@@ -141,7 +143,7 @@ export default function MusicScreen() {
         </View>
       )}
 
-      <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>FREE TRACKS</Text>
+      <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>{t("music.freeTracks")}</Text>
     </View>
   );
 
@@ -166,7 +168,7 @@ export default function MusicScreen() {
             if (item.type === "premiumHeader") {
               return (
                 <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>
-                  PREMIUM TRACKS
+                  {t("music.premiumTracks")}
                 </Text>
               );
             }

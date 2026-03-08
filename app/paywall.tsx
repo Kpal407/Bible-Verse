@@ -16,35 +16,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useThemeColors } from "@/constants/colors";
 import { usePremium } from "@/contexts/PremiumContext";
-
-const FEATURES = [
-  {
-    icon: "cloud-download-outline" as const,
-    title: "Offline Bible",
-    description: "Download all 31,102 KJV verses for reading anytime, anywhere",
-  },
-  {
-    icon: "infinite-outline" as const,
-    title: "Unlimited AI Verses",
-    description: "Get endless personalized KJV verses for every life situation",
-  },
-  {
-    icon: "musical-notes-outline" as const,
-    title: "Premium Music",
-    description: "Access all ambient spiritual music tracks for meditation",
-  },
-  {
-    icon: "heart-outline" as const,
-    title: "Support the Mission",
-    description: "Help keep Daily Word available and growing for everyone",
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function PaywallScreen() {
   const colorScheme = useColorScheme();
   const colors = useThemeColors(colorScheme);
   const insets = useSafeAreaInsets();
   const { offerings, purchasePackage, restorePurchases, isPremium } = usePremium();
+  const { t } = useLanguage();
   const [purchasing, setPurchasing] = useState(false);
   const [restoring, setRestoring] = useState(false);
 
@@ -52,6 +31,29 @@ export default function PaywallScreen() {
 
   const currentOffering = offerings?.current;
   const packages = currentOffering?.availablePackages || [];
+
+  const FEATURES = [
+    {
+      icon: "cloud-download-outline" as const,
+      title: t("paywall.offlineBible"),
+      description: t("paywall.offlineBibleDesc"),
+    },
+    {
+      icon: "infinite-outline" as const,
+      title: t("paywall.unlimitedAi"),
+      description: t("paywall.unlimitedAiDesc"),
+    },
+    {
+      icon: "musical-notes-outline" as const,
+      title: t("paywall.premiumMusic"),
+      description: t("paywall.premiumMusicDesc"),
+    },
+    {
+      icon: "heart-outline" as const,
+      title: t("paywall.supportMission"),
+      description: t("paywall.supportMissionDesc"),
+    },
+  ];
 
   const handlePurchase = async (pkg: any) => {
     setPurchasing(true);
@@ -70,10 +72,10 @@ export default function PaywallScreen() {
     try {
       const success = await restorePurchases();
       if (success) {
-        Alert.alert("Restored", "Your premium access has been restored.");
+        Alert.alert(t("paywall.restored"), t("paywall.restoredMsg"));
         router.back();
       } else {
-        Alert.alert("No Purchases Found", "We couldn't find any previous purchases to restore.");
+        Alert.alert(t("paywall.noPurchases"), t("paywall.noPurchasesMsg"));
       }
     } finally {
       setRestoring(false);
@@ -94,9 +96,9 @@ export default function PaywallScreen() {
           <View style={styles.premiumBadge}>
             <Ionicons name="star" size={48} color={colors.gold} />
           </View>
-          <Text style={[styles.premiumTitle, { color: colors.text }]}>You're Premium</Text>
+          <Text style={[styles.premiumTitle, { color: colors.text }]}>{t("paywall.yourePremium")}</Text>
           <Text style={[styles.premiumSubtitle, { color: colors.textSecondary }]}>
-            You have full access to all Daily Word features
+            {t("paywall.fullAccess")}
           </Text>
         </View>
       </View>
@@ -125,8 +127,8 @@ export default function PaywallScreen() {
           style={styles.heroBanner}
         >
           <Ionicons name="star" size={40} color="#FFFFFF" />
-          <Text style={styles.heroTitle}>Daily Word Premium</Text>
-          <Text style={styles.heroSubtitle}>Unlock the full power of Scripture</Text>
+          <Text style={styles.heroTitle}>{t("paywall.title")}</Text>
+          <Text style={styles.heroSubtitle}>{t("paywall.subtitle")}</Text>
         </LinearGradient>
 
         <View style={styles.featuresSection}>
@@ -182,8 +184,8 @@ export default function PaywallScreen() {
             <Pressable
               onPress={() => {
                 Alert.alert(
-                  "Coming Soon",
-                  "Premium subscriptions will be available when the app is published to the App Store. RevenueCat is running in preview mode."
+                  t("paywall.comingSoon"),
+                  t("paywall.comingSoonAlert")
                 );
               }}
               style={({ pressed }) => [
@@ -196,10 +198,10 @@ export default function PaywallScreen() {
               ]}
               testID="premium-placeholder"
             >
-              <Text style={[styles.packageTitle, { color: colors.text }]}>Premium</Text>
-              <Text style={[styles.packagePrice, { color: colors.gold }]}>Coming Soon</Text>
+              <Text style={[styles.packageTitle, { color: colors.text }]}>{t("paywall.premium")}</Text>
+              <Text style={[styles.packagePrice, { color: colors.gold }]}>{t("paywall.comingSoon")}</Text>
               <Text style={[styles.packageDesc, { color: colors.textSecondary }]}>
-                Subscriptions will be available on the App Store
+                {t("paywall.comingSoonDesc")}
               </Text>
             </Pressable>
           </View>
@@ -218,12 +220,12 @@ export default function PaywallScreen() {
           {restoring ? (
             <ActivityIndicator size="small" color={colors.textMuted} />
           ) : (
-            <Text style={[styles.restoreText, { color: colors.textMuted }]}>Restore Purchases</Text>
+            <Text style={[styles.restoreText, { color: colors.textMuted }]}>{t("paywall.restorePurchases")}</Text>
           )}
         </Pressable>
 
         <Text style={[styles.legalText, { color: colors.textMuted }]}>
-          Payment will be charged to your Apple ID or Google account. Subscriptions automatically renew unless cancelled at least 24 hours before the end of the current period.
+          {t("paywall.legalText")}
         </Text>
       </ScrollView>
     </View>

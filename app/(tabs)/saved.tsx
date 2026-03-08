@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useThemeColors } from "@/constants/colors";
 import { useSavedVerses } from "@/contexts/SavedVersesContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import VerseCard from "@/components/VerseCard";
 
 export default function SavedScreen() {
@@ -18,6 +19,7 @@ export default function SavedScreen() {
   const colors = useThemeColors(colorScheme);
   const insets = useSafeAreaInsets();
   const { savedVerses, isLoading } = useSavedVerses();
+  const { t } = useLanguage();
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
 
@@ -31,24 +33,24 @@ export default function SavedScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text }]}>Saved Verses</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t("saved.title")}</Text>
           <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-            Your personal collection
+            {t("saved.subtitle")}
           </Text>
         </View>
 
         {isLoading ? (
           <View style={styles.emptyState}>
-            <Text style={[styles.emptyText, { color: colors.textMuted }]}>Loading...</Text>
+            <Text style={[styles.emptyText, { color: colors.textMuted }]}>{t("saved.loading")}</Text>
           </View>
         ) : savedVerses.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="bookmark-outline" size={48} color={colors.textMuted} />
             <Text style={[styles.emptyTitle, { color: colors.textSecondary }]}>
-              No saved verses yet
+              {t("saved.noSavedYet")}
             </Text>
             <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-              Tap the bookmark icon on any verse to save it here
+              {t("saved.tapBookmark")}
             </Text>
           </View>
         ) : (

@@ -70,7 +70,8 @@ function isValidBibleReference(v: GeneratedVerse): boolean {
 async function generateVersesForCategory(
   categoryId: string,
   count: number = 20,
-  excludeReferences: string[] = []
+  excludeReferences: string[] = [],
+  lang: string = "en"
 ): Promise<GeneratedVerse[]> {
   if (!openai) return [];
 
@@ -82,6 +83,10 @@ async function generateVersesForCategory(
       ? `\n\nDo NOT include any of these verses (already shown to the user): ${excludeReferences.join(", ")}`
       : "";
 
+  const isSpanish = lang === "es";
+  const translationName = isSpanish ? "Reina Valera 1960 (RVR1960)" : "King James Version (KJV)";
+  const translationShort = isSpanish ? "RVR1960" : "KJV";
+
   const response = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     max_completion_tokens: 4000,
@@ -89,16 +94,16 @@ async function generateVersesForCategory(
     messages: [
       {
         role: "system",
-        content: `You are a Bible scholar. Return ONLY a valid JSON array of Bible verses. Each verse must be a real, verbatim scripture from the King James Version (KJV) of the Bible. Every reference must be accurate — do not fabricate or paraphrase. Include verses from both Old and New Testament when relevant.
+        content: `You are a Bible scholar. Return ONLY a valid JSON array of Bible verses. Each verse must be a real, verbatim scripture from the ${translationName} of the Bible. Every reference must be accurate — do not fabricate or paraphrase. Include verses from both Old and New Testament when relevant.${isSpanish ? " All verse text must be in Spanish from the Reina Valera 1960 translation. Book names in the reference and book fields must be in English." : ""}
 
 Return exactly this JSON structure (no markdown, no explanation, just the array):
-[{"reference":"Book Chapter:Verse","text":"exact KJV scripture text","book":"Book Name","chapter":1,"verse":"1"}]
+[{"reference":"Book Chapter:Verse","text":"exact ${translationShort} scripture text","book":"Book Name","chapter":1,"verse":"1"}]
 
 For verse ranges like "1-3", use the range string in the verse field. The text must contain the complete passage for that range.`,
       },
       {
         role: "user",
-        content: `Give me ${count} real Bible verses (King James Version) related to: ${topic}. Choose diverse verses from different books of the Bible. Include lesser-known verses, not just the most popular ones.${excludeList}`,
+        content: `Give me ${count} real Bible verses (${translationName}) related to: ${topic}. Choose diverse verses from different books of the Bible. Include lesser-known verses, not just the most popular ones.${excludeList}`,
       },
     ],
   });
@@ -129,15 +134,16 @@ For verse ranges like "1-3", use the range string in the verse field. The text m
 const chapterCache = new Map<string, { verses: any[]; timestamp: number }>();
 const CACHE_TTL = 1000 * 60 * 60;
 
-async function fetchKJVChapter(book: string, chapter: number): Promise<any[]> {
-  const cacheKey = `${book}:${chapter}`;
+async function fetchBibleChapter(book: string, chapter: number, translation: string = "kjv"): Promise<any[]> {
+  const validTranslation = translation === "rvr1960" ? "rvr1960" : "kjv";
+  const cacheKey = `${validTranslation}:${book}:${chapter}`;
   const cached = chapterCache.get(cacheKey);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
     return cached.verses;
   }
 
   const query = encodeURIComponent(`${book} ${chapter}`);
-  const response = await fetch(`https://bible-api.com/${query}?translation=kjv`);
+  const response = await fetch(`https://bible-api.com/${query}?translation=${validTranslation}`);
 
   if (!response.ok) {
     throw new Error(`Bible API returned ${response.status}`);
@@ -175,7 +181,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ verses: [], page, available: false });
       }
 
-      const verses = await generateVersesForCategory(categoryId, 20, exclude);
+      const lang = (req.query.lang as string) || "en";
+      const verses = await generateVersesForCategory(categoryId, 20, exclude, lang);
 
       const versesWithIds = verses.map((v, i) => ({
         ...v,
@@ -193,12 +200,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { book, chapter } = req.params;
       const chapterNum = parseInt(chapter);
+      const translation = (req.query.translation as string) || "kjv";
 
       if (!chapterNum || chapterNum < 1) {
         return res.status(400).json({ error: "Invalid chapter number" });
       }
 
-      const verses = await fetchKJVChapter(decodeURIComponent(book), chapterNum);
+      const verses = await fetchBibleChapter(decodeURIComponent(book), chapterNum, translation);
       res.json({ book: decodeURIComponent(book), chapter: chapterNum, verses });
     } catch (error: any) {
       console.error("Error fetching Bible chapter:", error.message);

@@ -17,6 +17,7 @@ import { getVerseOfTheDay, getAllCategories } from "@/data/verses";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { usePremium } from "@/contexts/PremiumContext";
 import { useMusic } from "@/contexts/MusicContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import VerseCard from "@/components/VerseCard";
 import CategoryCard from "@/components/CategoryCard";
 import MusicPlayer from "@/components/MusicPlayer";
@@ -31,6 +32,7 @@ export default function HomeScreen() {
   const { prefs } = useNotifications();
   const { isPremium } = usePremium();
   const { currentTrack } = useMusic();
+  const { t, language, setLanguage, dateLocale } = useLanguage();
   const { verse: todayVerse, category: todayCategory } = getVerseOfTheDay();
   const categories = getAllCategories();
 
@@ -41,13 +43,19 @@ export default function HomeScreen() {
   }, []);
 
   const today = new Date();
-  const dateStr = today.toLocaleDateString("en-US", {
+  const dateStr = today.toLocaleDateString(dateLocale, {
     weekday: "long",
     month: "long",
     day: "numeric",
   });
 
+  const toggleLanguage = () => {
+    setLanguage(language === "en" ? "es" : "en");
+  };
+
   const webTopInset = Platform.OS === "web" ? 67 : 0;
+
+  const categoryName = t(`category.${todayCategory.id}.name`);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -65,9 +73,23 @@ export default function HomeScreen() {
           <View style={styles.headerTopRow}>
             <View>
               <Text style={[styles.dateLabel, { color: colors.textMuted }]}>{dateStr}</Text>
-              <Text style={[styles.title, { color: colors.text }]}>Verse of the Day</Text>
+              <Text style={[styles.title, { color: colors.text }]}>{t("today.verseOfTheDay")}</Text>
             </View>
             <View style={styles.headerActions}>
+              <Pressable
+                onPress={toggleLanguage}
+                style={({ pressed }) => [
+                  styles.headerBtn,
+                  { backgroundColor: colors.tintLight, opacity: pressed ? 0.7 : 1 },
+                ]}
+                hitSlop={8}
+                testID="language-toggle"
+              >
+                <Ionicons name="globe-outline" size={20} color={colors.gold} />
+                <Text style={[styles.langLabel, { color: colors.gold }]}>
+                  {language.toUpperCase()}
+                </Text>
+              </Pressable>
               <Pressable
                 onPress={() => router.push("/music")}
                 style={({ pressed }) => [
@@ -118,16 +140,16 @@ export default function HomeScreen() {
         <VerseCard
           verse={todayVerse}
           gradient={todayCategory.gradient}
-          showCategory={todayCategory.name}
+          showCategory={categoryName}
           large
         />
 
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            What are you going through?
+            {t("today.whatAreYouGoingThrough")}
           </Text>
           <Text style={[styles.sectionSubtitle, { color: colors.textSecondary }]}>
-            Find verses that speak to your heart
+            {t("today.findVerses")}
           </Text>
         </View>
 
@@ -142,7 +164,7 @@ export default function HomeScreen() {
         </ScrollView>
 
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Browse Topics</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t("today.browseTopics")}</Text>
         </View>
 
         {categories.slice(0, 5).map((cat) => (
@@ -189,6 +211,11 @@ const styles = StyleSheet.create({
     borderRadius: 13,
     alignItems: "center",
     justifyContent: "center",
+  },
+  langLabel: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 8,
+    marginTop: -2,
   },
   dateLabel: {
     fontFamily: "Inter_500Medium",

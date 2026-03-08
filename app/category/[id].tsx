@@ -20,6 +20,7 @@ import { getCategoryById, shuffleVerses } from "@/data/verses";
 import VerseCard from "@/components/VerseCard";
 import { apiRequest } from "@/lib/query-client";
 import { usePremium } from "@/contexts/PremiumContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { Category, Verse } from "@/data/verses";
 
 function CategoryIcon({ category, size, color }: { category: Category; size: number; color: string }) {
@@ -50,12 +51,14 @@ export default function CategoryScreen() {
   const [aiLoadCount, setAiLoadCount] = useState(0);
   const seenRefsRef = useRef<Set<string>>(new Set());
   const { isPremium, canLoadMoreAI, remainingFreeLoads } = usePremium();
+  const { t, language } = useLanguage();
 
   const loadAIVerses = useCallback(async (currentVerses: Verse[], pageNum: number): Promise<{ verses: Verse[]; gotNew: boolean }> => {
     try {
       const excludeRefs = Array.from(seenRefsRef.current);
       const excludeParam = excludeRefs.length > 0 ? `&exclude=${encodeURIComponent(excludeRefs.join(","))}` : "";
-      const res = await apiRequest("GET", `/api/verses/${id}?page=${pageNum}${excludeParam}`);
+      const langParam = language === "es" ? `&lang=es` : "";
+      const res = await apiRequest("GET", `/api/verses/${id}?page=${pageNum}${excludeParam}${langParam}`);
       const data = await res.json();
 
       if (data.available === false) {
@@ -74,7 +77,7 @@ export default function CategoryScreen() {
       console.log("AI verses unavailable, using local only");
     }
     return { verses: currentVerses, gotNew: false };
-  }, [id]);
+  }, [id, language]);
 
   useFocusEffect(
     useCallback(() => {
@@ -133,11 +136,15 @@ export default function CategoryScreen() {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <Text style={[styles.errorText, { color: colors.textSecondary }]}>
-          Category not found
+          {t("category.notFound")}
         </Text>
       </View>
     );
   }
+
+  const categoryName = t(`category.${category.id}.name`);
+  const categoryDescription = t(`category.${category.id}.description`);
+  const verseLabel = verses.length !== 1 ? t("category.versesPlural") : t("category.verses");
 
   const renderHeader = () => (
     <LinearGradient
@@ -175,10 +182,10 @@ export default function CategoryScreen() {
         <View style={styles.heroIcon}>
           <CategoryIcon category={category} size={36} color="rgba(255,255,255,0.95)" />
         </View>
-        <Text style={styles.heroTitle}>{category.name}</Text>
-        <Text style={styles.heroDescription}>{category.description}</Text>
+        <Text style={styles.heroTitle}>{categoryName}</Text>
+        <Text style={styles.heroDescription}>{categoryDescription}</Text>
         <Text style={styles.heroCount}>
-          {verses.length} verse{verses.length !== 1 ? "s" : ""}
+          {verses.length} {verseLabel}
         </Text>
       </View>
     </LinearGradient>
@@ -191,7 +198,7 @@ export default function CategoryScreen() {
         <View style={styles.loadingMore}>
           <ActivityIndicator size="small" color={colors.gold} />
           <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
-            Finding more verses...
+            {t("category.findingMore")}
           </Text>
         </View>
       );
@@ -216,12 +223,12 @@ export default function CategoryScreen() {
             color={colors.gold}
           />
           <Text style={[styles.loadMoreText, { color: colors.gold }]}>
-            {canLoad ? "Load More Verses" : "Unlock Unlimited Verses"}
+            {canLoad ? t("category.loadMore") : t("category.unlockUnlimited")}
           </Text>
         </Pressable>
         {!isPremium && canLoad && remaining < 3 && (
           <Text style={[styles.freeLoadsHint, { color: colors.textMuted }]}>
-            {remaining} free {remaining === 1 ? "load" : "loads"} remaining
+            {remaining} {remaining === 1 ? t("category.freeLoadsRemaining") : t("category.freeLoadsRemainingPlural")}
           </Text>
         )}
       </View>

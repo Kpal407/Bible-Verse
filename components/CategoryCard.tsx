@@ -5,6 +5,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import type { Category } from "@/data/verses";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface CategoryCardProps {
   category: Category;
@@ -26,6 +27,10 @@ function CategoryIcon({ category, size, color }: { category: Category; size: num
 }
 
 export default function CategoryCard({ category, compact }: CategoryCardProps) {
+  const { t } = useLanguage();
+  const name = t(`category.${category.id}.name`);
+  const description = t(`category.${category.id}.description`);
+
   const handlePress = async () => {
     if (Platform.OS !== "web") {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -51,7 +56,7 @@ export default function CategoryCard({ category, compact }: CategoryCardProps) {
           <CategoryIcon category={category} size={24} color="rgba(255,255,255,0.9)" />
         </LinearGradient>
         <Text style={styles.compactName} numberOfLines={1}>
-          {category.name}
+          {name}
         </Text>
       </Pressable>
     );
@@ -75,9 +80,9 @@ export default function CategoryCard({ category, compact }: CategoryCardProps) {
           <CategoryIcon category={category} size={28} color="rgba(255,255,255,0.95)" />
         </View>
         <View style={styles.textContainer}>
-          <Text style={styles.name}>{category.name}</Text>
+          <Text style={styles.name}>{name}</Text>
           <Text style={styles.description} numberOfLines={1}>
-            {category.description}
+            {description}
           </Text>
         </View>
         <View style={styles.count}>
