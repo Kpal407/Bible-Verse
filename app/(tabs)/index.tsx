@@ -74,7 +74,7 @@ export default function HomeScreen() {
       >
         <View style={styles.header}>
           <View style={styles.headerTopRow}>
-            <View>
+            <View style={styles.headerTitleWrap}>
               <Text style={[styles.dateLabel, { color: colors.textMuted }]}>{dateStr}</Text>
               <Text style={[styles.title, { color: colors.text }]}>{t("today.verseOfTheDay")}</Text>
             </View>
@@ -88,7 +88,7 @@ export default function HomeScreen() {
                 hitSlop={8}
                 testID="language-toggle"
               >
-                <Ionicons name="globe-outline" size={20} color={colors.gold} />
+                <Ionicons name="globe-outline" size={18} color={colors.gold} />
                 <Text style={[styles.langLabel, { color: colors.gold }]}>
                   {language.toUpperCase()}
                 </Text>
@@ -104,7 +104,7 @@ export default function HomeScreen() {
               >
                 <Ionicons
                   name={currentTrack ? "musical-notes" : "musical-notes-outline"}
-                  size={20}
+                  size={18}
                   color={colors.gold}
                 />
               </Pressable>
@@ -118,13 +118,13 @@ export default function HomeScreen() {
                   hitSlop={8}
                   testID="premium-button"
                 >
-                  <Ionicons name="star" size={18} color={colors.gold} />
+                  <Ionicons name="star" size={16} color={colors.gold} />
                 </Pressable>
               )}
               <Pressable
                 onPress={() => router.push("/notification-settings")}
                 style={({ pressed }) => [
-                  styles.bellBtn,
+                  styles.headerBtn,
                   { backgroundColor: colors.tintLight, opacity: pressed ? 0.7 : 1 },
                 ]}
                 hitSlop={8}
@@ -132,7 +132,7 @@ export default function HomeScreen() {
               >
                 <Ionicons
                   name={prefs.enabled ? "notifications" : "notifications-outline"}
-                  size={22}
+                  size={20}
                   color={colors.gold}
                 />
               </Pressable>
@@ -223,23 +223,21 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "flex-start",
   },
+  headerTitleWrap: {
+    flex: 1,
+    marginRight: 8,
+  },
   headerActions: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 6,
     marginTop: 2,
+    flexShrink: 0,
   },
   headerBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 13,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  bellBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 13,
+    width: 36,
+    height: 36,
+    borderRadius: 11,
     alignItems: "center",
     justifyContent: "center",
   },
