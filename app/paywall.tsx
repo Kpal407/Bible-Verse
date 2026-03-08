@@ -32,6 +32,40 @@ export default function PaywallScreen() {
   const currentOffering = offerings?.current;
   const packages = currentOffering?.availablePackages || [];
 
+  const findPackage = (keyword: string) =>
+    packages.find(
+      (p) =>
+        p.identifier.toLowerCase().includes(keyword) ||
+        p.packageType?.toLowerCase?.()?.includes?.(keyword)
+    );
+
+  const TIERS = [
+    {
+      id: "yearly",
+      label: t("paywall.yearly"),
+      price: "$29.99",
+      desc: t("paywall.yearlyDesc"),
+      highlight: true,
+      pkg: findPackage("annual") || findPackage("year"),
+    },
+    {
+      id: "monthly",
+      label: t("paywall.monthly"),
+      price: "$4.99",
+      desc: t("paywall.monthlyDesc"),
+      highlight: false,
+      pkg: findPackage("month"),
+    },
+    {
+      id: "lifetime",
+      label: t("paywall.lifetime"),
+      price: "$59.99",
+      desc: t("paywall.lifetimeDesc"),
+      highlight: false,
+      pkg: findPackage("lifetime"),
+    },
+  ];
+
   const FEATURES = [
     {
       icon: "cloud-download-outline" as const,
@@ -145,67 +179,40 @@ export default function PaywallScreen() {
           ))}
         </View>
 
-        {packages.length > 0 ? (
-          <View style={styles.packagesSection}>
-            {packages.map((pkg) => {
-              const product = pkg.product;
-              return (
-                <Pressable
-                  key={pkg.identifier}
-                  onPress={() => handlePurchase(pkg)}
-                  disabled={purchasing}
-                  style={({ pressed }) => [
-                    styles.packageCard,
-                    {
-                      backgroundColor: colors.card,
-                      borderColor: colors.gold,
-                      opacity: pressed ? 0.85 : 1,
-                    },
-                  ]}
-                  testID={`package-${pkg.identifier}`}
-                >
-                  <Text style={[styles.packageTitle, { color: colors.text }]}>
-                    {product.title || pkg.identifier}
-                  </Text>
-                  <Text style={[styles.packagePrice, { color: colors.gold }]}>
-                    {product.priceString}
-                  </Text>
-                  {product.description ? (
-                    <Text style={[styles.packageDesc, { color: colors.textSecondary }]}>
-                      {product.description}
-                    </Text>
-                  ) : null}
-                </Pressable>
-              );
-            })}
-          </View>
-        ) : (
-          <View style={styles.packagesSection}>
-            <Pressable
-              onPress={() => {
-                Alert.alert(
-                  t("paywall.comingSoon"),
-                  t("paywall.comingSoonAlert")
-                );
-              }}
-              style={({ pressed }) => [
-                styles.packageCard,
-                {
-                  backgroundColor: colors.card,
-                  borderColor: colors.gold,
-                  opacity: pressed ? 0.85 : 1,
-                },
-              ]}
-              testID="premium-placeholder"
-            >
-              <Text style={[styles.packageTitle, { color: colors.text }]}>{t("paywall.premium")}</Text>
-              <Text style={[styles.packagePrice, { color: colors.gold }]}>{t("paywall.comingSoon")}</Text>
-              <Text style={[styles.packageDesc, { color: colors.textSecondary }]}>
-                {t("paywall.comingSoonDesc")}
-              </Text>
-            </Pressable>
-          </View>
-        )}
+        <View style={styles.packagesSection}>
+          {TIERS.map((tier) => (
+            <React.Fragment key={tier.id}>
+              {tier.highlight && (
+                <View style={[styles.bestValueTag, { backgroundColor: colors.gold }]}>
+                  <Ionicons name="ribbon-outline" size={14} color="#FFFFFF" />
+                  <Text style={styles.bestValueText}>{t("paywall.bestValue")}</Text>
+                </View>
+              )}
+              <Pressable
+                onPress={() =>
+                  tier.pkg
+                    ? handlePurchase(tier.pkg)
+                    : Alert.alert(t("paywall.comingSoon"), t("paywall.comingSoonAlert"))
+                }
+                disabled={purchasing}
+                style={({ pressed }) => [
+                  styles.packageCard,
+                  tier.highlight && styles.packageCardHighlight,
+                  {
+                    backgroundColor: colors.card,
+                    borderColor: tier.highlight ? colors.gold : colors.divider,
+                    opacity: pressed ? 0.85 : 1,
+                  },
+                ]}
+                testID={`package-${tier.id}`}
+              >
+                <Text style={[styles.packageTitle, { color: colors.text }]}>{tier.label}</Text>
+                <Text style={[styles.packagePrice, { color: colors.gold }]}>{tier.price}</Text>
+                <Text style={[styles.packageDesc, { color: colors.textSecondary }]}>{tier.desc}</Text>
+              </Pressable>
+            </React.Fragment>
+          ))}
+        </View>
 
         {purchasing && (
           <ActivityIndicator size="small" color={colors.gold} style={styles.spinner} />
@@ -304,6 +311,24 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     gap: 12,
   },
+  bestValueTag: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "center",
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 12,
+    gap: 5,
+    marginBottom: -8,
+    zIndex: 1,
+  },
+  bestValueText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 12,
+    color: "#FFFFFF",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
   packageCard: {
     borderRadius: 16,
     borderWidth: 2,
@@ -311,6 +336,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignItems: "center",
     gap: 4,
+  },
+  packageCardHighlight: {
+    paddingTop: 28,
   },
   packageTitle: {
     fontFamily: "Inter_600SemiBold",
