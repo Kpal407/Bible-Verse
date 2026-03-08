@@ -68,6 +68,11 @@ export default function PaywallScreen() {
 
   const FEATURES = [
     {
+      icon: "calendar-outline" as const,
+      title: t("paywall.liturgicalCalendar"),
+      description: t("paywall.liturgicalCalendarDesc"),
+    },
+    {
       icon: "cloud-download-outline" as const,
       title: t("paywall.offlineBible"),
       description: t("paywall.offlineBibleDesc"),
@@ -81,11 +86,6 @@ export default function PaywallScreen() {
       icon: "musical-notes-outline" as const,
       title: t("paywall.premiumMusic"),
       description: t("paywall.premiumMusicDesc"),
-    },
-    {
-      icon: "calendar-outline" as const,
-      title: t("paywall.liturgicalCalendar"),
-      description: t("paywall.liturgicalCalendarDesc"),
     },
     {
       icon: "heart-outline" as const,

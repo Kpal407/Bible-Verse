@@ -83,6 +83,10 @@ export default function UpgradeBanner({ variant = "full" }: UpgradeBannerProps) 
         <Text style={styles.fullDescription}>{t("upgrade.fullDesc")}</Text>
         <View style={styles.featureList}>
           <View style={styles.featureItem}>
+            <Ionicons name="calendar-outline" size={16} color="rgba(255,255,255,0.9)" />
+            <Text style={styles.featureText}>{t("upgrade.featureCalendar")}</Text>
+          </View>
+          <View style={styles.featureItem}>
             <Ionicons name="cloud-download-outline" size={16} color="rgba(255,255,255,0.9)" />
             <Text style={styles.featureText}>{t("upgrade.featureOffline")}</Text>
           </View>
@@ -97,10 +101,6 @@ export default function UpgradeBanner({ variant = "full" }: UpgradeBannerProps) 
           <View style={styles.featureItem}>
             <Ionicons name="globe-outline" size={16} color="rgba(255,255,255,0.9)" />
             <Text style={styles.featureText}>{t("upgrade.featureBilingual")}</Text>
-          </View>
-          <View style={styles.featureItem}>
-            <Ionicons name="calendar-outline" size={16} color="rgba(255,255,255,0.9)" />
-            <Text style={styles.featureText}>{t("upgrade.featureCalendar")}</Text>
           </View>
         </View>
         <View style={styles.fullButton}>
