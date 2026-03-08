@@ -55,7 +55,8 @@ Preferred communication style: Simple, everyday language.
 - **Saved verses**: Persisted client-side using `@react-native-async-storage/async-storage` under the key `@daily_word_saved_verses`
 - **Notification prefs**: Stored in AsyncStorage under `@daily_word_notification_prefs` — includes enabled flag, selected category, hour, minute. Uses `expo-notifications` for daily scheduled local notifications on iOS/Android
 - **Premium/Monetization**: RevenueCat (`react-native-purchases`) manages in-app subscriptions. PremiumContext initializes the SDK, checks entitlements ("premium" or "pro"), and gates features. Free users get 2 AI verse loads per category visit and 3 free music tracks; premium users get unlimited AI loads and all 5 music tracks. Paywall screen (`app/paywall.tsx`) shows as a formSheet modal with feature list, subscription packages, and restore purchases. Star icon on Today screen opens the paywall for non-premium users
-- **Ambient Music**: Floating mini-player (`components/MusicPlayer.tsx`) shows on Today screen when a track is playing. Music screen (`app/music.tsx`) lists all tracks with free/premium sections. Uses `expo-audio` for playback with looping and volume control. Tracks stream from the server as WAV audio
+- **Ambient Music**: Floating mini-player (`components/MusicPlayer.tsx`) shows on Today screen when a track is playing. Music screen (`app/music.tsx`) lists all tracks with free/premium sections. Uses `expo-av` for playback with looping and volume control. Tracks stream from the server as WAV audio
+- **Offline Bible**: Premium users can download the entire KJV Bible (31,102 verses, 66 books, 1,189 chapters) to their device via `BibleStorageContext`. Downloads happen book-by-book with progress tracking. Stored per-book in AsyncStorage. The Bible reader checks local storage first, falling back to the online API. Free users see an upgrade banner on the Bible tab; premium users see a download button. After download, an "Offline" badge shows in the reader header
 - **Database (scaffold)**: Drizzle ORM configured with PostgreSQL (`drizzle.config.ts`, `shared/schema.ts`). A `users` table is defined but not actively used yet. Ready for expansion
 
 ### Shared Schema
@@ -96,7 +97,7 @@ Preferred communication style: Simple, everyday language.
 | **react-native-safe-area-context** | Safe area insets for notches/home bars |
 | **react-native-keyboard-controller** | Keyboard-aware scroll behavior |
 | **react-native-purchases** | RevenueCat SDK for in-app subscriptions |
-| **expo-audio** | Audio playback for ambient music tracks |
+| **expo-av** | Audio playback for ambient music tracks |
 | **http-proxy-middleware** | Dev proxy setup |
 
 ### Environment Variables Required

@@ -15,6 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useThemeColors } from "@/constants/colors";
 import { apiRequest } from "@/lib/query-client";
 import { getBookByName } from "@/data/bible-books";
+import { useBibleStorage } from "@/contexts/BibleStorageContext";
 
 interface BibleVerse {
   verse: number;
@@ -26,9 +27,11 @@ export default function ReaderScreen() {
   const colorScheme = useColorScheme();
   const colors = useThemeColors(colorScheme);
   const insets = useSafeAreaInsets();
+  const { isDownloaded, hasPartialDownload, getOfflineChapter } = useBibleStorage();
   const [verses, setVerses] = useState<BibleVerse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isOffline, setIsOffline] = useState(false);
 
   const chapterNum = parseInt(chapter || "1");
   const bookData = getBookByName(book || "");
@@ -43,6 +46,18 @@ export default function ReaderScreen() {
   const loadChapter = async () => {
     setLoading(true);
     setError(null);
+    setIsOffline(false);
+
+    if ((isDownloaded || hasPartialDownload) && book) {
+      const offlineVerses = await getOfflineChapter(book, chapterNum);
+      if (offlineVerses && offlineVerses.length > 0) {
+        setVerses(offlineVerses);
+        setIsOffline(true);
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
       const res = await apiRequest("GET", `/api/bible/${encodeURIComponent(book || "")}/${chapterNum}`);
       const data = await res.json();
@@ -88,9 +103,17 @@ export default function ReaderScreen() {
             <Text style={[styles.headerBook, { color: colors.text }]} numberOfLines={1}>
               {book}
             </Text>
-            <Text style={[styles.headerChapter, { color: colors.textMuted }]}>
-              Chapter {chapterNum}
-            </Text>
+            <View style={styles.headerSubRow}>
+              <Text style={[styles.headerChapter, { color: colors.textMuted }]}>
+                Chapter {chapterNum}
+              </Text>
+              {isOffline && (
+                <View style={styles.offlineBadge}>
+                  <Ionicons name="checkmark-circle" size={12} color="#4CAF50" />
+                  <Text style={styles.offlineText}>Offline</Text>
+                </View>
+              )}
+            </View>
           </View>
           <View style={{ width: 40 }} />
         </View>
@@ -208,9 +231,24 @@ const styles = StyleSheet.create({
     fontFamily: "PlayfairDisplay_700Bold",
     fontSize: 18,
   },
+  headerSubRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
   headerChapter: {
     fontFamily: "Inter_400Regular",
     fontSize: 12,
+  },
+  offlineBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+  },
+  offlineText: {
+    fontFamily: "Inter_500Medium",
+    fontSize: 10,
+    color: "#4CAF50",
   },
   loadingContainer: {
     paddingTop: 100,

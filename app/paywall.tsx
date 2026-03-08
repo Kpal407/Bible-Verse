@@ -19,14 +19,19 @@ import { usePremium } from "@/contexts/PremiumContext";
 
 const FEATURES = [
   {
+    icon: "cloud-download-outline" as const,
+    title: "Offline Bible",
+    description: "Download all 31,102 KJV verses for reading anytime, anywhere",
+  },
+  {
     icon: "infinite-outline" as const,
     title: "Unlimited AI Verses",
     description: "Get endless personalized KJV verses for every life situation",
   },
   {
-    icon: "sparkles-outline" as const,
-    title: "Fresh Inspiration Daily",
-    description: "Never run out of Scripture with AI-curated verse discovery",
+    icon: "musical-notes-outline" as const,
+    title: "Premium Music",
+    description: "Access all ambient spiritual music tracks for meditation",
   },
   {
     icon: "heart-outline" as const,
