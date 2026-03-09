@@ -171,7 +171,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 <style>body{font-family:sans-serif;max-width:600px;margin:40px auto;padding:20px;background:#1a1a2e;color:#fff}
 h1{color:#FFA5D9}a{display:block;margin:20px 0;padding:16px 24px;background:#D2319A;color:#fff;
 text-decoration:none;border-radius:12px;font-size:18px;text-align:center}a:hover{background:#b02880}</style>
-</head><body><h1>Daily Word - Promo Images</h1>
+</head><body><h1>Verse Bloom - Promo Images</h1>
 <p>Click each link below to download. On the image page, right-click and choose "Save image as..."</p>
 <a href="/promo/promo_vatican.png" target="_blank">1. Vatican - St. Peter's Basilica</a>
 <a href="/promo/promo_rio.png" target="_blank">2. Rio - Christ the Redeemer</a>

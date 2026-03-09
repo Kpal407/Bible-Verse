@@ -1,8 +1,8 @@
-# Daily Word - Replit.md
+# Verse Bloom - Replit.md
 
 ## Overview
 
-Daily Word is a React Native mobile app built with Expo that delivers Bible verses to users. The app features:
+Verse Bloom is a React Native mobile app built with Expo that delivers Bible verses to users. The app features:
 - A **Today** tab showing a daily verse of the day
 - A **Browse** tab for exploring verses organized by categories (Daily Devotional, Faith, Hope, etc.)
 - A **Bible** tab with a full King James Version Bible reader (browse by book, chapter, and verse)

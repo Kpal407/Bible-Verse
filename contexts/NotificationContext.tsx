@@ -58,7 +58,7 @@ async function scheduleDaily(prefs: NotificationPrefs) {
   const verse = getRandomVerseFromCategory(prefs.categoryId);
   const body = verse
     ? `${verse.text}\n— ${verse.reference}`
-    : "Open Daily Word for today's verse.";
+    : "Open Verse Bloom for today's verse.";
 
   await Notifications.scheduleNotificationAsync({
     content: {

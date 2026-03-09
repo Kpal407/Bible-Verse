@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Daily Word",
-    "slug": "daily-word",
+    "name": "Verse Bloom",
+    "slug": "verse-bloom",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "dailyword",
+    "scheme": "versebloom",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -15,10 +15,10 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.dailyword"
+      "bundleIdentifier": "com.versebloom"
     },
     "android": {
-      "package": "com.dailyword",
+      "package": "com.versebloom",
       "adaptiveIcon": {
         "backgroundColor": "#0F1B2D",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
