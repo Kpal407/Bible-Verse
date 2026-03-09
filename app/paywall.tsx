@@ -43,7 +43,7 @@ export default function PaywallScreen() {
     {
       id: "yearly",
       label: t("paywall.yearly"),
-      price: "$29.99",
+      price: "$19.99",
       desc: t("paywall.yearlyDesc"),
       highlight: true,
       pkg: findPackage("annual") || findPackage("year"),
@@ -59,7 +59,7 @@ export default function PaywallScreen() {
     {
       id: "lifetime",
       label: t("paywall.lifetime"),
-      price: "$59.99",
+      price: "$29.99",
       desc: t("paywall.lifetimeDesc"),
       highlight: false,
       pkg: findPackage("lifetime"),
