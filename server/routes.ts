@@ -177,6 +177,13 @@ text-decoration:none;border-radius:12px;font-size:18px;text-align:center}a:hover
 <a href="/promo/promo_rio.png" target="_blank">2. Rio - Christ the Redeemer</a>
 <a href="/promo/promo_jerusalem.png" target="_blank">3. Jerusalem - Holy Sepulchre</a>
 <a href="/promo/promo_barcelona.png" target="_blank">4. Barcelona - Sagrada Familia</a>
+<h1 style="margin-top:40px">App Screenshots</h1>
+<p>Screenshots of each screen in the app:</p>
+<a href="/promo/screen_today.png" target="_blank">Today Screen</a>
+<a href="/promo/screen_browse.png" target="_blank">Browse Screen</a>
+<a href="/promo/screen_calendar.png" target="_blank">Calendar Screen</a>
+<a href="/promo/screen_bible.png" target="_blank">Bible Screen</a>
+<a href="/promo/screen_paywall.png" target="_blank">Paywall Screen</a>
 </body></html>`);
   });
 
